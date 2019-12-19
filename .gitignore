@@ -1,6 +1,10 @@
 # Compiled class file
 *.class
 
+#
+hsa
+ready
+
 # Log file
 *.log
 

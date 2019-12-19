@@ -111,5 +111,10 @@ public class Background
         c.fillRect (354, 250, 10, 10);      //Right Window
         c.setColor (new Color (51, 37, 30));
         c.fillRect (328, 265, 20, 15);      //Door
+
+        c.setColor(new Color(253,21,27));
+        c.setFont(new Font("TimesRoman",Font.PLAIN,40));
+        c.drawString("Created By",450,425);
+        c.drawString("Joshua Liu",450,470);
     }
 }

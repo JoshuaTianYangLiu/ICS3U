@@ -1,4 +1,9 @@
-// The "MyCreation" class.
+/*
+Joshua Liu
+Mr. Afsari-Nejad
+October 25, 2019
+MyCreation creates a winter scene with many dynamic animated objects
+*/
 import java.awt.*;
 import java.lang.*;
 import hsa.Console;
@@ -6,76 +11,69 @@ import hsa.Console;
 public class MyCreation
 {
     Console c;           // The output console
-    MyCreation ()
+    MyCreation ()       //Constructor
     {
 	c = new Console ("My Creation: Winter");
     }
 
 
-    void initUtil ()
+    void initUtil ()    //Init buffer
     {
 	DrawUtil.loadBuffer ();
     }
 
 
-    void background ()
+    void background ()      //Draw background
     {
-	Background g = new Background (c);
+	Background bg = new Background (c);
     }
 
 
-    void sled ()
+    void sled ()        //Start sled thread
     {
-	Sled s = new Sled (c);
-	s.start ();
+	Sled sled = new Sled (c);
+	sled.start ();
     }
 
 
-    void cabinSmoke ()
+    void cabinSmoke ()  //Start cabin smoke thread
     {
-	AnimateCabinSmoke cs = new AnimateCabinSmoke (c);
-	cs.start ();
+	AnimateCabinSmoke animSmoke = new AnimateCabinSmoke (c);
+	animSmoke.start ();
     }
 
 
-    void bird ()
+    void bird ()    //Start bird thread
     {
-	AnimateBird b = new AnimateBird (c);
-	b.start ();
+	AnimateBird animBird = new AnimateBird (c);
+	animBird.start ();
     }
 
 
-    void snow ()
+    void snow ()    //Start snow thread
     {
-	AnimateSnow sn = new AnimateSnow (c);
-	sn.start ();
+	AnimateSnow animSnow = new AnimateSnow (c);
+	animSnow.start ();
     }
 
 
-    void star ()
+    void star ()    //Start star thread
     {
-	AnimateStar st = new AnimateStar (c);
-	st.start ();
+	AnimateStar animStar = new AnimateStar (c);
+	animStar.start ();
     }
 
 
-    void figureSkater ()
+    void figureSkater ()    //Start skater thread
     {
-	Thread t = new Thread (new Skater (c));
-	t.start ();
+	Thread skater = new Thread (new Skater (c));
+	skater.start ();
     }
 
 
-    public static void main (String[] args)
+    public static void main (String[] args) //Main
     {
 	MyCreation c = new MyCreation ();
-	//background    0
-	//star                  1-10
-	//cabinSmoke    11-13
-	//bird                  14-20
-	//sled                  21
-	//figureSkater  22
-	//snow                  22-32
 	c.initUtil ();
 	c.background ();
 	c.sled ();
@@ -84,6 +82,5 @@ public class MyCreation
 	c.snow ();
 	c.star ();
 	c.figureSkater ();
-	// Place your program here.  'c' is the output console
     } // main method
 } // MyCreation class

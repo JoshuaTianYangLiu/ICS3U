@@ -15,13 +15,18 @@ public class AnimateCabinSmoke extends Thread
         this.c = c;
     }
 
-
+    CabinSmoke s[] = new CabinSmoke[4]; //Limits number of smoke clouds to 4 incase of the computer slowing down.
     void runAnimateCabinSmoke ()
     {
         while (true)        //Continuously runs
         {
-            CabinSmoke s = new CabinSmoke (c);
-            s.start ();     //Makes new instance of Cabin Smoke
+            for(int i=0; i<4; i++){
+                if(s[i]==null||s[i].isAlive()){
+                    s[i] = new CabinSmoke (c);
+                    s[i].start ();     //Makes new instance of Cabin Smoke
+                    break;
+                }
+            }
             try
             {
                 Thread.sleep (3000);
