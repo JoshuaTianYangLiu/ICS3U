@@ -1,18 +1,11 @@
+import java.awt.*;
 import hsa.Console;
-import java.io.*;
+import javax.swing.*;
+
 
 
 public class Testing{
     public static void main(String[] args) throws Exception{
-        Console c = new Console();
-        c.println("Testing");
-        try{
-            Thread.sleep(5000);
-        }catch(Exception e){}
-        c.println("Running");
-        while(true){
-            c.println(c.isCharAvail());
-        }
-        c.println("Finish");
+        JOptionPane.showMessageDialog(null, "Testing 123", "Warning",JOptionPane.WARNING_MESSAGE);   //Error trap
     }
 }

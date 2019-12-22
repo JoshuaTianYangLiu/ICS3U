@@ -4,6 +4,19 @@ import java.util.*;
 
 public class ISP_Joshua{
     Console c;
+    //Player id will start from 1
+    //Tiles with start from 1
+    final int NUMBEROFTILES=40;
+    final int NUMOFPLAYERS=(2)+1;
+    int initialBalance=1500;
+    boolean hasGetOutOfJail[]=new boolean[NUMOFPLAYERS];
+    int positionOfPlayers[] = new int[NUMOFPLAYERS];
+    int balance[] = new int[NUMOFPLAYERS];
+    Property monopolyTiles[] = new Property[NUMBEROFTILES];
+    // int propertyToPlayer[] = new int[NUMOFPLAYERS];
+    // int propertyToHotel[] = new int[NUMOFPLAYERS];   //Player can own a max of 1 hotel
+    // int propertyToHouse[] = new int[NUMOFPLAYERS];  //Player can own a max of __ hotel
+    int curPlayer;
     ISP_Joshua(){
         c=new Console("Monopoly");
     }
@@ -25,87 +38,105 @@ public class ISP_Joshua{
     void goodbye(){
 
     }
-    void display(){
-import hsa.Console;
-import java.io.*;
-
-
-public class ReadFile{
-    static String prompt[] = new String[31000];
-    static String theme[] = new String[31000];
-    public static void main(String[] args) throws Exception{
-        Console c = new Console();
-        BufferedReader br = new BufferedReader(new FileReader("WordList.txt"));
-        int b=0;
-        for(String a = br.readLine(); a!=null; a=br.readLine(),b++){
-            String[] cTemp = a.split("\\|");
-            prompt[b]=cTemp[0];
-            theme[b]=cTemp[1];
-        }
-        br.close();
-        while(true){
-            int choice= (int)(Math.random()*29532);
-            String phrase = prompt[choice];
-            c.println("Hint: "+theme[choice]);
-            phrase = phrase.replaceAll("[A-z]", "_ ");
-            int lives=5;
-            while(lives>0&&phrase.contains("_")){
-                c.println("Hint: "+theme[choice] + " "+prompt[choice].length()+" characters");
-                c.println(phrase+" Lives: "+lives);
-                // c.println(prompt[choice]+" DEBUG INFO");
-                c.println("Choose Option:");
-                c.println("--------------------");
-                c.println("1: Choose character");
-                c.println("2: Solve phrase");
-                int option;
-                while(true){
-                    try{
-                        option=Integer.parseInt(c.readString());
-                        if(option==1||option==2)break;
-                        c.println("Choose option 1 or 2");
-                    }catch(Exception e){
-                        c.println("Enter option reee: ");
-                    }
-                }
-                if(option==1){
-                    c.print("Enter a character: ");
-                    char input=c.readLine().charAt(0);
-                    String inputStr=input+"";
-                    if(prompt[choice].contains(input+"")&&inputStr.matches("[A-z]")){
-                        for(int i=0; i<prompt[choice].length(); i++){
-                            if(prompt[choice].charAt(i)==input){
-                                phrase=phrase.substring(0,2*i)+input+phrase.substring(2*i+1);
-                            }
-                        }
-                    }else{
-                        lives--;
-                    }
-                }else{
-                    c.print("Solve the phrase");
-                    if(prompt[choice].toLowerCase().equals(c.readLine().toLowerCase())){
-                        phrase=prompt[choice];
-                    }else{
-                        lives--;
-                    }
-                }
-            }
-            if(lives==0){
-                c.println("YOU LOST");
-                c.println("Phrase is "+prompt[choice]);
-            }else{
-                c.println("YOU WIN!");
-            }
-            c.println("Press any key for a new game");
-            c.getChar();
-            c.println();
-            c.println("NEW GAME");
-            c.println("-----------");
-        }
-    }
-}
-    }
     void scoreboard(){
 
+    }
+    boolean canEvenSell(int colourId){
+        int curTile = positionOfPlayers[curPlayer];
+        int max=-1,min=-1;
+        for(Property tile:monopolyTiles){
+            if(tile.propertyColour==colourId){  //Same colour set
+                if(max==-1)max=tile.getTierLevel();
+                else max=Math.max(max,tile.getTierLevel());
+                if(min==-1)min=tile.getTierLevel();
+                else min=Math.min(min,tile.getTierLevel());
+            }
+        }
+        return max==monopolyTiles[curTile].getTierLevel();
+    }
+    boolean canEvenBuild(int colourId){
+        int curTile = positionOfPlayers[curPlayer];
+        int max=-1,min=-1;
+        for(Property tile:monopolyTiles){
+            if(tile.propertyColour==colourId){  //Same colour set
+                if(max==-1)max=tile.getTierLevel();
+                else max=Math.max(max,tile.getTierLevel());
+                if(min==-1)min=tile.getTierLevel();
+                else min=Math.min(min,tile.getTierLevel());
+            }
+        }
+        return min==monopolyTiles[curTile].getTierLevel();
+    }
+    boolean ownsColourSet(int colourId){
+        for(Property tile:monopolyTiles){
+            if(tile.propertyColour==colourId){  //Same colour set
+                if(!tile.isOwnBy(curPlayer))return false;   //Someone else owns the tile
+                if(tile.isMortgaged())return false; //Is mortgaged
+            }
+        }
+        return true;
+    }
+    int getHotels(){
+        int numOfHotels=0;
+        // for(int i=1; i<)
+    }
+    int getBalance(int player){
+        return balance[player];
+    }
+    int getBalance(){
+        return getBalance(curPlayer);
+    }
+    void addGetOutOfJail(){
+        addGetOutOfJail(curPlayer);
+    }
+    void addGetOutOfJail(int player){ //This will give the current player a get out of jail card
+        hasGetOutOfJail[player]=true;
+    }
+    void addMoney(int amount,int player){   //This will change to include animation
+        balance[player]+=amount;
+    }
+    void addMoney(int amount){
+        addMoney(amount,curPlayer);
+    }
+    void removeMoney(int amount,int player){
+        balance[player]-=amount;
+    }
+    void removeMoney(int amount){
+        removeMoney(amount,curPlayer);
+    }
+    void transferMoney(int amount,int player,int player1){ //Transfer money from player to player1
+        balance[player]-=amount;
+        balance[player]+=amount;
+    }
+    void transferMoney(int amount,int player){  //Transfer money from curent player to player
+        transferMoney(amount,curPlayer, player);
+    }
+    void moveTo(int properties,int player){
+
+    }
+    void moveTo(int properties){
+        moveTo(properties,curPlayer);
+    }
+    void resetBoard(){  //Resets board
+        curPlayer=1;
+
+        // Arrays.fill(propertyToHotel, 0);
+        // Arrays.fill(propertyToHouse, 0);
+        // Arrays.fill(propertyToPlayer,0);
+        Arrays.fill(positionOfPlayers,1);
+        Arrays.fill(balance,initialBalance);
+        Arrays.fill(hasGetOutOfJail,false);
+    }
+    void display(){
+        /*
+        Reset board
+        Generate the properties
+        Generate/Randomize cards
+
+
+        Problems:
+        How should i alternate between players? boolean?
+        */
     }
     public static void main(String[] args){
         ISP_Joshua isp = new ISP_Joshua();
