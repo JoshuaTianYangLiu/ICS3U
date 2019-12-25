@@ -1,23 +1,13 @@
-public class ChanceCards{
-    enum ChanceLabels{
-        MOVETO, //int
-        ADD,    //int
-        REMOVE, //int
-        GETOUT, //void
-        MAKEHIMLOSE,    //int,int
-        NEARUTIL,   //void
-        NEARRAIL,   //void
-        GIVEPLAYERS,    //int
-    }
+public class ChanceCard implements Tile{
     String message;
-    ChanceLabels operation;
+    CardLabels operation;
     int value1,value2;
     ChanceCards(String input){
         //We need to parse the string and assign the corresponding info
         //Will be seperated by &
         String portions[] = input.split("&");
         message=portions[0];
-        operation=ChanceLabels.valueOf(portions[1]);
+        operation=CardLabels.valueOf(portions[1]);
         switch(operation){
         case MOVETO:
             value1=Integer.parseInt(portions[2]);
@@ -35,17 +25,22 @@ public class ChanceCards{
         case GIVEPLAYERS:
             value1=Integer.parseInt(portions[2]);
             break;
+        }
     }
-    String getMessage(){
+    
+    public String getInfo() {
         return message;
     }
-    void executeCard(ISP_Joshua j){
+    public int getTileType(){
+        return 4;
+    }
+    void executeTile(ISP_Joshua j){
         switch(operation){
             case GETOUT:
                 j.addGetOutOfJail();
                 break;
             case NEARRAIL:
-                for(int)
+                // for(int )
                 break;
             case NEARUTIL:
 
@@ -70,6 +65,11 @@ public class ChanceCards{
                         j.transferMoney(value1, i);
                     }
                 }
+                break;
+            case MOVEBACK:
+                break;
+            case GOTOJAIL:
+                j.goToJail();
                 break;
             }
     }

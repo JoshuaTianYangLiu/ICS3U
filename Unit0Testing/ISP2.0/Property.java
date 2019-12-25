@@ -1,4 +1,6 @@
-public class Property{
+import javax.swing.JOptionPane;
+
+public class Property implements Tile{
     //This also needs to work with railroads and utilities
     //How am i gonna make this work with chance cards?
     //
@@ -8,7 +10,7 @@ public class Property{
     //Main class will handle it
     static final int MORTGAGE=-1;
     String name;
-    int propertyColour;
+    int propertyColour;     //start from 2. 1 for railroad 0 for utility
     int propertyCost;
     int tierLevel;  //0=rent -1= morgage, >0 houses/ hotels
     int tierCost[] = new int[6];
@@ -30,6 +32,7 @@ public class Property{
         }
         propertyCost=Integer.parseInt(portions[11]);
     }
+
     void buyProperty(ISP_Joshua j){
         if(playerId==0&j.getBalance()>propertyCost){
             playerId=j.curPlayer;                           //curent player new owns the property
@@ -97,6 +100,24 @@ public class Property{
         }else{
 
         }
+    }
+    public void executeTile(ISP_Joshua j){
+        if(j.curPlayer!=playerId)payRent(j);
+        //Ask for option
+        int option=1;
+        if(option==1){  //Buy property
+            buyProperty(j);
+        }else if(option==2){    //Buy houses
+            buyHouse(j);
+        }else if(option==3||option==4){    //Sell/Mortgage
+            sellHouse(j);
+        }
+    }
+    public int getTileType(){
+        return 2;
+    }
+    public String getInfo(){
+        return name;    //Maybe need other info such of money and such.
     }
 }
 /*

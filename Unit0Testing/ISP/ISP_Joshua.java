@@ -7,18 +7,19 @@ public class ISP_Joshua{
     //Player id will start from 1
     //Tiles with start from 1
     final int NUMBEROFTILES=40;
-    final int NUMOFPLAYERS=(2)+1;
+    int numOfPlayers=(2)+1;
     int initialBalance=1500;
-    boolean hasGetOutOfJail[]=new boolean[NUMOFPLAYERS];
-    int positionOfPlayers[] = new int[NUMOFPLAYERS];
-    int balance[] = new int[NUMOFPLAYERS];
+    boolean hasGetOutOfJail[]=new boolean[numOfPlayers];
+    int positionOfPlayers[] = new int[numOfPlayers];
+    int balance[] = new int[numOfPlayers];
     Property monopolyTiles[] = new Property[NUMBEROFTILES];
-    // int propertyToPlayer[] = new int[NUMOFPLAYERS];
-    // int propertyToHotel[] = new int[NUMOFPLAYERS];   //Player can own a max of 1 hotel
-    // int propertyToHouse[] = new int[NUMOFPLAYERS];  //Player can own a max of __ hotel
+    int bankAmount=0;
+    // int propertyToPlayer[] = new int[numOfPlayers];
+    // int propertyToHotel[] = new int[numOfPlayers];   //Player can own a max of 1 hotel
+    // int propertyToHouse[] = new int[numOfPlayers];  //Player can own a max of __ hotel
     int curPlayer;
     ISP_Joshua(){
-        c=new Console("Monopoly");
+        // c=new Console("Monopoly");
     }
     void splashScreen(){
 
@@ -79,6 +80,7 @@ public class ISP_Joshua{
     int getHotels(){
         int numOfHotels=0;
         // for(int i=1; i<)
+        return 0;
     }
     int getBalance(int player){
         return balance[player];
@@ -104,6 +106,10 @@ public class ISP_Joshua{
     void removeMoney(int amount){
         removeMoney(amount,curPlayer);
     }
+    void removeMoneyToBank(int amount){ //Different from remove money, this money is kept and is able to collect from free parking
+        balance[curPlayer]-=amount;
+        bankAmount+=amount;
+    }
     void transferMoney(int amount,int player,int player1){ //Transfer money from player to player1
         balance[player]-=amount;
         balance[player]+=amount;
@@ -112,22 +118,46 @@ public class ISP_Joshua{
         transferMoney(amount,curPlayer, player);
     }
     void moveTo(int properties,int player){
-
+        //Make sure to check if pass go
     }
     void moveTo(int properties){
         moveTo(properties,curPlayer);
     }
     void resetBoard(){  //Resets board
         curPlayer=1;
-
+        bankAmount=0;
         // Arrays.fill(propertyToHotel, 0);
         // Arrays.fill(propertyToHouse, 0);
         // Arrays.fill(propertyToPlayer,0);
         Arrays.fill(positionOfPlayers,1);
         Arrays.fill(balance,initialBalance);
         Arrays.fill(hasGetOutOfJail,false);
+        
+    }
+    int[] rollDice(){
+        int diceOne = (int)(6*Math.random()+1);
+        int diceTwo = (int)(6*Math.random()+1);
+        return new int[]{diceOne+diceTwo};
+    }
+    void move(int spaces){
+        positionOfPlayers[curPlayer]+=spaces;
+        if(positionOfPlayers[curPlayer]>=NUMBEROFTILES){    //Loop back to beginning
+            positionOfPlayers[curPlayer]-=NUMBEROFTILES+1;
+        }
+    }
+    void goToJail(){
+        positionOfPlayers[curPlayer]=10;    //JAIL
+    }
+    void executeTile(){
+        
     }
     void display(){
+        while (true){
+            int dice[]=rollDice();
+            System.out.printf("You rolled a %d and a %d\nMove %d spaces",dice[0],dice[1],dice[0]+dice[1]);
+            move(dice[0]+dice[1]);
+
+        }
         /*
         Reset board
         Generate the properties
@@ -141,7 +171,7 @@ public class ISP_Joshua{
     public static void main(String[] args){
         ISP_Joshua isp = new ISP_Joshua();
         isp.splashScreen();
-        for(int i =isp.mainMenu(); i!=6; i=isp.mainMenu()){
+        for(int i=isp.mainMenu(); i!=6; i=isp.mainMenu()){
             if(i==1)isp.display();
             if(i==2)isp.instructions();
             if(i==3)isp.rules();
