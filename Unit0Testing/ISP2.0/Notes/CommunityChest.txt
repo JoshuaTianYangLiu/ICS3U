@@ -1,18 +1,19 @@
-public class CommunityChest implements Tile{
-    String message;
-    CardLabels operation;
-    CommunityChest(String input){
-        String portions[] = input.split("&");
-        message=portions[0];
-        operation=CardLabels.valueOf(portions[1]);
-        
-    }
-}
+COMMUNITY CHEST:
 
-/*
-message&operation&values
 
-Mystery Chest List
+Action
+    Gotta find a way to generalize every possible action
+
+    Move to property
+    Add/Remove money
+    Get out of Jail Free
+    Go to Jail
+    For each house, pay $25. For each hotel, pay $100
+    Get money from every player
+
+
+
+Card List:
 
 Advance to Go (Collect $200)
 Bank error in your favor—Collect $200
@@ -31,4 +32,3 @@ Receive $25 consultancy fee
 You are assessed for street repairs–$40 per house–$115 per hotel
 You have won second prize in a beauty contest–Collect $10
 You inherit $100
-*/

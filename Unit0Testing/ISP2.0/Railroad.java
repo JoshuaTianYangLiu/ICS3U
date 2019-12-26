@@ -1,26 +1,32 @@
 public class Railroad implements Tile{
+    String name;
     int cost;
-    int mortgageValue;
+    int unMortgageValue;
     int playerId;
     int rentCost[] = new int[5];
-    Railroad(String input){
-        String portions[] = input.split("&");
+    Railroad(String input)throws Exception{
+        //TODO: Add exception handler
+        String portions[] = input.split("\\|");     // Added \\ as escape characters 
+        if(portions.length!=7){
+            throw new Exception("Not enough parameters in railroad line\n Input: "+input);
+        }
         playerId=0;
-        cost=Integer.parseInt(portions[0]);
-        mortgageValue=Integer.parseInt(portions[1]);
+        name=portions[0];
+        cost=Integer.parseInt(portions[1]);
+        unMortgageValue=Integer.parseInt(portions[2]);
         for(int i=1; i<5; i++){
-            rentCost[i]=Integer.parseInt(portions[i+1]);
+            rentCost[i]=Integer.parseInt(portions[i+2]);
         }
     }
     void buyProperty(ISP_Joshua j){
-        if(playerId==0&j.getBalance()>cost){
-            playerId=j.curPlayer;                           //curent player new owns the property
-            j.removeMoney(cost);                    //Remove the money
-        }else if (j.getBalance()<=cost){
-            //Not enough money
-        }else{
-            //Plot owned, cannot buy
-        }
+        // if(playerId==0&j.getBalance()>cost){
+        //     playerId=j.curPlayer;                           //curent player new owns the property
+        //     j.removeMoney(cost);                    //Remove the money
+        // }else if (j.getBalance()<=cost){
+        //     //Not enough money
+        // }else{
+        //     //Plot owned, cannot buy
+        // }
     } 
     void mortgage(ISP_Joshua j){
 

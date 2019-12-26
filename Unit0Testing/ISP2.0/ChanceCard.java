@@ -1,4 +1,4 @@
-public class ChanceCard implements Tile{
+public class ChanceCard{    //TODO: Clean up code from removing the Tile interface
     String message;
     CardLabels operation;
     int value1,value2;

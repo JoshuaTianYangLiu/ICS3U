@@ -16,90 +16,40 @@ public class Property implements Tile{
     int tierCost[] = new int[6];
     int houseCost;
     int hotelCost;
-    int mortgageValue;
+    int mortgageValue,unMortgageValue;
     int playerId;
-    Property(String input){
+    Property(String input) throws Exception{
         playerId=0;
         tierLevel=0;
-        String portions[] = input.split("&");
+        String portions[] = input.split("\\|");     // Added \\ as escape characters 
+        if(portions.length!=12){
+            throw new Exception("Not enough parameters in property line\n Input: "+input);
+        }
         name=portions[0];
         propertyColour=Integer.parseInt(portions[1]);
         houseCost=Integer.parseInt(portions[2]);
         hotelCost=Integer.parseInt(portions[3]);
-        mortgageValue = Integer.parseInt(portions[4]);
+        propertyCost=Integer.parseInt(portions[4]);
+        unMortgageValue = Integer.parseInt(portions[5]);
         for(int i=0; i<6; i++){
-            tierCost[i]=Integer.parseInt(portions[5+i]);
+            tierCost[i]=Integer.parseInt(portions[6+i]);
         }
-        propertyCost=Integer.parseInt(portions[11]);
+        mortgageValue = propertyCost/2;
+        //Monopoly rules says that mortgage value is half the cost of the property cost
+        //selling anything is half the cost right?????
     }
 
     void buyProperty(ISP_Joshua j){
-        if(playerId==0&j.getBalance()>propertyCost){
-            playerId=j.curPlayer;                           //curent player new owns the property
-            j.removeMoney(propertyCost);                    //Remove the money
-        }else if (j.getBalance()<=propertyCost){
-            //Not enough money
-        }else{
-            //Plot owned, cannot buy
-        }
-    }
-    int getTierLevel(){
-        return tierLevel;
-    }
-    boolean isBought(){
-        return playerId!=0;
+        
     }
     void payRent(ISP_Joshua j){
-        if(tierLevel!=MORTGAGE&&j.curPlayer!=playerId){
-            j.transferMoney(tierCost[tierLevel], playerId);
-        }else{
-            //If player owns property
-            //If property is mortgaged, probably nothing needed
-        }
-    }
-    boolean tierMaxedOut(){
-        return tierLevel==5;
-    }
-    boolean isLowestTier(){
-        return tierLevel==-1;
-    }
-    int costOfNextTier(){
-        if(tierLevel+1==5)return hotelCost;
-        else return houseCost;
-    }
-    int costOfPrevTier(){
-        if(tierLevel-1==-1)return mortgageValue;
-        else return houseCost/2;
-    }
-    boolean isMortgaged(){
-        return tierLevel==-1;
-    }
-    boolean isOwnBy(int player){
-        return player==playerId;
+        
     }
     void buyHouse(ISP_Joshua j){    //In my words, move up a tier level
-        if(j.ownsColourSet(propertyColour)&&
-        !tierMaxedOut()&&
-        j.getBalance()>costOfNextTier()&&
-        j.canEvenBuild(propertyColour)){  
-            //Added a check to see if the house bought is "level" with the others
-            //This rule is called even build
-            j.removeMoney(costOfNextTier());
-            tierLevel++;
-        }else{
-
-        }
+        
     }
     void sellHouse(ISP_Joshua j){   //Move down a tier, this should also work with mortgaging
-        if(!isLowestTier()&&
-        j.canEvenSell(propertyColour)){  
-            //Added a check to see if the house bought is "level" with the others
-            //This rule is called even build
-            j.addMoney(costOfPrevTier());
-            tierLevel--;
-        }else{
-
-        }
+        
     }
     public void executeTile(ISP_Joshua j){
         if(j.curPlayer!=playerId)payRent(j);
@@ -132,11 +82,11 @@ Next off, The chance card!
 As to my contest checker, taking a break from that, need a better way to parse
 */
 /*
-name&group&houseCost&hotelCost&morgageValue&tierCost&propertyCost
+name|group|houseCost|hotelCost|propertyCost|unmortgagevalue|tierCost
 Name of Property
 Property group
 Rent
-Morgage Value
+Mortgage Value
 With one house:
 With two house:
 With three house:
