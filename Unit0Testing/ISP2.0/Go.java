@@ -4,6 +4,7 @@ public class Go implements Tile{
     }
     public void executeTile(ISP_Joshua j){
         //Go needs nothing right?
+        //Im pretty sure it needs nothing
     }
     public int getTileType(){
         return 1;

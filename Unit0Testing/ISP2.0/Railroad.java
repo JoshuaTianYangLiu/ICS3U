@@ -1,8 +1,9 @@
 public class Railroad implements Tile{
+    static final int NOTOWNED=0;
     String name;
     int cost;
     int unMortgageValue;
-    int playerId;
+    int ownerId;
     int rentCost[] = new int[5];
     Railroad(String input)throws Exception{
         //TODO: Add exception handler
@@ -10,7 +11,7 @@ public class Railroad implements Tile{
         if(portions.length!=7){
             throw new Exception("Not enough parameters in railroad line\n Input: "+input);
         }
-        playerId=0;
+        ownerId=0;
         name=portions[0];
         cost=Integer.parseInt(portions[1]);
         unMortgageValue=Integer.parseInt(portions[2]);
@@ -18,36 +19,38 @@ public class Railroad implements Tile{
             rentCost[i]=Integer.parseInt(portions[i+2]);
         }
     }
-    void buyProperty(ISP_Joshua j){
-        // if(playerId==0&j.getBalance()>cost){
-        //     playerId=j.curPlayer;                           //curent player new owns the property
-        //     j.removeMoney(cost);                    //Remove the money
-        // }else if (j.getBalance()<=cost){
-        //     //Not enough money
-        // }else{
-        //     //Plot owned, cannot buy
-        // }
+    void buyProperty(ISP_Joshua j,int amount){
+        j.removeMoney(amount);
+        ownerId=j.curPlayer;
+        j.addToInventory(this);
     } 
-    void mortgage(ISP_Joshua j){
-
-    }
-    void unmortgage(ISP_Joshua j){
-        
-    }
     void payRent(ISP_Joshua j){
-        //Get number of railroads
+        //TODO: Get number of railroads owned
+        int numberOfRails=1;
+        j.transferMoney(rentCost[numberOfRails],ownerId);
     }
     public void executeTile(ISP_Joshua j){
-        if(j.curPlayer!=playerId)payRent(j);
-        //Ask for option
-        int option=1;
-        //Make sure to check if you can even perform that action
-        if(option==1){  //Buy property
-            buyProperty(j);
-        }else if(option==2){    //Buy mortgaged property
-            unmortgage(j);
-        }else if(option==3){    //Mortgage property
-            mortgage(j);
+        if(ownerId==NOTOWNED){  //If not owned
+            int choice = Util.queryInt("Please choose an option:\n"+
+                                    "1: Buy railroad\n"+
+                                    "2: Put up for auction",
+                                    "Please enter a valid option 1,2",
+                                    name,1,2);
+                                    //TODO: add an option to disable auctions
+            if(choice==1){
+                if(j.getBalance()>=cost){
+                    buyProperty(j,cost);
+                    return;
+                }else{
+                    Util.messageDialog("You do not have enough money,\n"+
+                                        "Putting property up for auction.", name);
+                }
+            }
+            j.runAuction(this);
+        }else{
+            if(j.curPlayer!=ownerId){
+                payRent(j);
+            }
         }
     }
     public int getTileType(){

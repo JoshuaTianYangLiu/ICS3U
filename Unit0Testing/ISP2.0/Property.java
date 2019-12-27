@@ -9,6 +9,7 @@ public class Property implements Tile{
     //Return the id of the property
     //Main class will handle it
     static final int MORTGAGE=-1;
+    static final int NOTOWNED=0;
     String name;
     int propertyColour;     //start from 2. 1 for railroad 0 for utility
     int propertyCost;
@@ -17,9 +18,9 @@ public class Property implements Tile{
     int houseCost;
     int hotelCost;
     int mortgageValue,unMortgageValue;
-    int playerId;
+    int ownerId;
     Property(String input) throws Exception{
-        playerId=0;
+        ownerId=0;
         tierLevel=0;
         String portions[] = input.split("\\|");     // Added \\ as escape characters 
         if(portions.length!=12){
@@ -39,11 +40,13 @@ public class Property implements Tile{
         //selling anything is half the cost right?????
     }
 
-    void buyProperty(ISP_Joshua j){
-        
+    void buyProperty(ISP_Joshua j,int cost){    //The property can be bought with different costs due to auctions
+        j.removeMoney(cost);
+        ownerId=j.curPlayer;
+        j.addToInventory(this);
     }
     void payRent(ISP_Joshua j){
-        
+        j.transferMoney(tierCost[tierLevel],ownerId);
     }
     void buyHouse(ISP_Joshua j){    //In my words, move up a tier level
         
@@ -52,15 +55,30 @@ public class Property implements Tile{
         
     }
     public void executeTile(ISP_Joshua j){
-        if(j.curPlayer!=playerId)payRent(j);
-        //Ask for option
-        int option=1;
-        if(option==1){  //Buy property
-            buyProperty(j);
-        }else if(option==2){    //Buy houses
-            buyHouse(j);
-        }else if(option==3||option==4){    //Sell/Mortgage
-            sellHouse(j);
+        //For the property tile, it is difficult to execute the property and known what function it should do.
+        //This method if for just what should happen when a person lands on the tile
+        //Meaning this will only have the option to buy and pay rent
+        if(ownerId==NOTOWNED){  //If not owned
+            int choice = Util.queryInt("Please choose an option:\n"+
+                                    "1: Buy property\n"+
+                                    "2: Put up for auction",
+                                    "Please enter a valid option 1,2",
+                                    name,1,2);
+                                    //TODO: add an option to disable auctions
+            if(choice==1){
+                if(j.getBalance()>=propertyCost){
+                    buyProperty(j,propertyCost);
+                    return;
+                }else{
+                    Util.messageDialog("You do not have enough money,\n"+
+                                        "Putting property up for auction.", name);
+                }
+            }
+            j.runAuction(this);
+        }else{
+            if(j.curPlayer!=ownerId){
+                payRent(j);
+            }
         }
     }
     public int getTileType(){

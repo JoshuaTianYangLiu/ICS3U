@@ -19,6 +19,9 @@ Action
     Give every player money
     Get money from every player
 
+Choice:
+    Mortgage/Sell house
+    Unmortgage/Buy house
 
 
 

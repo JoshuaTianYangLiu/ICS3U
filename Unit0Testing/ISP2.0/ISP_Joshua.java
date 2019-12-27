@@ -52,9 +52,29 @@ public class ISP_Joshua{
     void moveForward(int n){
         positionOfPlayers[curPlayer]+=n;
         if(positionOfPlayers[curPlayer]>NUMBEROFTILES){    //That mean they passed go
-            balance[curPlayer]+=200;    //TODO:Change this to method
+            balance[curPlayer]+=200;    //TODO: Change this to method
             positionOfPlayers[curPlayer]-=NUMBEROFTILES;
         }
+    }
+    void transferMoney(int amount,int player){  //Transfer money from curplayer to player
+        balance[curPlayer]-=amount;
+        balance[player]+=amount;
+    }
+    void addMoney(int amount){  //This will have an animation added
+        balance[curPlayer]+=amount;
+    }
+    void removeMoney(int amount){  //This will have an animation added
+        balance[curPlayer]-=amount;
+    }
+    void runAuction(Tile land){ //TODO: Run auction for property
+
+    }
+    void addToInventory(Tile land){
+        //Add tile to inventory to make it easier to design ui for buying/selling/trading property
+        //This also may make it easier to do some searching even though it may be done in a few extra lines
+    }
+    int getBalance(){
+        return balance[curPlayer];
     }
     void nextTurn(){
         curPlayer++;
@@ -63,7 +83,11 @@ public class ISP_Joshua{
     int getPosOfCurPlayer(){
         return positionOfPlayers[curPlayer];
     }
+    void sendToJail(){
+
+    }
     void display(){
+        int concurrentDoubles=0;
         resetBoard();
         while(true){
             c.println("Waiting for input");
@@ -71,17 +95,26 @@ public class ISP_Joshua{
             rollDice();
             c.getChar();
             c.println("You rolled a "+diceOne+" and a "+diceTwo);
-            if(diceOne==diceTwo)c.println("Doubles!");
+            if(diceOne==diceTwo){
+                concurrentDoubles++;
+                c.println("Doubles!");
+            }
             c.println("---------------------------");
             c.println("You were on "+monopolyTiles[getPosOfCurPlayer()].getInfo());
-            c.println(getPosOfCurPlayer());
-            moveForward(diceOne+diceTwo);
+            if(concurrentDoubles==3){   //Roll three doubles rule
+                sendToJail();
+                nextTurn();
+                continue;
+            }else{
+                moveForward(diceOne+diceTwo);
+            }
             c.println("You are now on "+monopolyTiles[getPosOfCurPlayer()].getInfo());
-            c.println(getPosOfCurPlayer());
+            monopolyTiles[getPosOfCurPlayer()].executeTile(this);
             if(diceOne==diceTwo){
                 c.println("Roll again");
             }else{
                 c.println("Next turn");
+                concurrentDoubles=0;
                 nextTurn();
             }
         }
