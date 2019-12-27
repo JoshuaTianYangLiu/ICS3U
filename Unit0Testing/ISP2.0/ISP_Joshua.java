@@ -13,9 +13,9 @@ public class ISP_Joshua{
     boolean hasGetOutOfJail[]=new boolean[numOfPlayers];
     int positionOfPlayers[] = new int[numOfPlayers];
     int balance[] = new int[numOfPlayers];
+    Tile monopolyTiles[] = new Tile[NUMBEROFTILES+1];
+    int diceOne,diceTwo;
 
-
-    Tile monopolyTiles[] = new Tile[NUMBEROFTILES];
     // int propertyToPlayer[] = new int[numOfPlayers];
     // int propertyToHotel[] = new int[numOfPlayers];   //Player can own a max of 1 hotel
     // int propertyToHouse[] = new int[numOfPlayers];  //Player can own a max of __ hotel
@@ -44,8 +44,51 @@ public class ISP_Joshua{
     void scoreboard(){
 
     }
+    void resetBoard(){
+        curPlayer=1;
+        Arrays.fill(positionOfPlayers,1);
+        Arrays.fill(balance,initialBalance);
+    }
+    void moveForward(int n){
+        positionOfPlayers[curPlayer]+=n;
+        if(positionOfPlayers[curPlayer]>NUMBEROFTILES){    //That mean they passed go
+            balance[curPlayer]+=200;    //TODO:Change this to method
+            positionOfPlayers[curPlayer]-=NUMBEROFTILES;
+        }
+    }
+    void nextTurn(){
+        curPlayer++;
+        if(curPlayer==numOfPlayers)curPlayer=1;
+    }
+    int getPosOfCurPlayer(){
+        return positionOfPlayers[curPlayer];
+    }
     void display(){
-
+        resetBoard();
+        while(true){
+            c.println("Waiting for input");
+            c.println("---------------------------");
+            rollDice();
+            c.getChar();
+            c.println("You rolled a "+diceOne+" and a "+diceTwo);
+            if(diceOne==diceTwo)c.println("Doubles!");
+            c.println("---------------------------");
+            c.println("You were on "+monopolyTiles[getPosOfCurPlayer()].getInfo());
+            c.println(getPosOfCurPlayer());
+            moveForward(diceOne+diceTwo);
+            c.println("You are now on "+monopolyTiles[getPosOfCurPlayer()].getInfo());
+            c.println(getPosOfCurPlayer());
+            if(diceOne==diceTwo){
+                c.println("Roll again");
+            }else{
+                c.println("Next turn");
+                nextTurn();
+            }
+        }
+    }
+    void rollDice(){
+        diceOne=(int)(6*Math.random()+1);
+        diceTwo=(int)(6*Math.random()+1);
     }
     void loadAssets(){
         /*
@@ -63,6 +106,9 @@ public class ISP_Joshua{
         10	UTILITY
         */
         BufferedReader boardTileId=null,properties=null,railroad=null,utility=null;
+        //Two options UK and US
+        String boardLanguage="UK";
+
         try{
             boardTileId = new BufferedReader(new FileReader(new File("assets\\BoardTileId.txt")));
         }catch(Exception e){
@@ -71,14 +117,20 @@ public class ISP_Joshua{
             System.exit(1);
         }
         try{
-            properties = new BufferedReader(new FileReader(new File("assets\\Properties.txt")));
+            if(boardLanguage.equals("US"))
+                properties = new BufferedReader(new FileReader(new File("assets\\PropertiesUS.txt")));
+            else
+                properties = new BufferedReader(new FileReader(new File("assets\\PropertiesUK.txt")));
         }catch(Exception e){
             System.out.println("Properties.txt not found, please include file");
             e.printStackTrace();
             System.exit(1);
         }
         try{
-            railroad = new BufferedReader(new FileReader(new File("assets\\Railroad.txt")));
+            if(boardLanguage.equals("US"))
+                railroad = new BufferedReader(new FileReader(new File("assets\\RailroadUS.txt")));
+            else
+                railroad = new BufferedReader(new FileReader(new File("assets\\RailroadUK.txt")));
         }catch(Exception e){
             System.out.println("Railroad.txt not found, please include file");
             e.printStackTrace();
@@ -91,7 +143,7 @@ public class ISP_Joshua{
             e.printStackTrace();
             System.exit(1);
         }
-        for(int i=1; i<NUMBEROFTILES; i++){
+        for(int i=1; i<=NUMBEROFTILES; i++){
             try{
                 switch(boardTileId.readLine()){
                     case "1":
@@ -156,7 +208,20 @@ public class ISP_Joshua{
                 System.exit(1);
             }
         }
+        try{
+            boardTileId.close();
+            properties.close();
+            railroad.close();
+            utility.close();
+        }catch(Exception e){
+            System.out.println("Error in closing files");
+            e.printStackTrace();
+            System.exit(1);
+        }
+        //TODO: Also load the community chest and chance cards into array
     }
+    
+
     public static void main(String[] args){
         ISP_Joshua isp = new ISP_Joshua();
         isp.loadAssets();

@@ -22,7 +22,7 @@ public class Utility implements Tile{
         return 10;
     }
     public String getInfo(){
-        return "Utility";
+        return name;
     }
 }
 /*

@@ -9,6 +9,6 @@ public class Go implements Tile{
         return 1;
     }
     public String getInfo(){
-        return ""; //Idk if anything is needed
+        return "Go"; //Idk if anything is needed
     }
 }
