@@ -11,11 +11,16 @@ public class ISP_Joshua{
     int initialBalance=1500;
     int bankAmount=0;
     boolean hasGetOutOfJail[]=new boolean[numOfPlayers];
+    boolean inJail[] = new boolean[numOfPlayers];
+    int turnsInJail[] = new int[numOfPlayers];
     int positionOfPlayers[] = new int[numOfPlayers];
     int balance[] = new int[numOfPlayers];
+    String nameOfPlayer[] = new String[numOfPlayers];
     Tile monopolyTiles[] = new Tile[NUMBEROFTILES+1];
+    ArrayList<OwnableTile> playerInventory[] = new ArrayList[numOfPlayers];
     int diceOne,diceTwo;
-
+    Queue<ChanceCard> chancePile = new LinkedList<ChanceCard>();
+    Queue<CommunityChestCard> communityChestPile = new LinkedList<CommunityChestCard>();
     // int propertyToPlayer[] = new int[numOfPlayers];
     // int propertyToHotel[] = new int[numOfPlayers];   //Player can own a max of 1 hotel
     // int propertyToHouse[] = new int[numOfPlayers];  //Player can own a max of __ hotel
@@ -42,12 +47,41 @@ public class ISP_Joshua{
 
     }
     void scoreboard(){
-
+        //I will score it by whoever has the most money
     }
     void resetBoard(){
         curPlayer=1;
+
+        for(int i=0; i<numOfPlayers; i++){
+            playerInventory[i]=new ArrayList<OwnableTile>();
+        }
         Arrays.fill(positionOfPlayers,1);
         Arrays.fill(balance,initialBalance);
+        Arrays.fill(hasGetOutOfJail,false);
+    }
+    void addGetOutOfJail(){
+        hasGetOutOfJail[curPlayer]=true;
+    }
+    void moveBack(int spaces){
+        positionOfPlayers[curPlayer]-=spaces;
+        //As this is only activated by chance tiles this will have loop over from the start
+    }
+    void moveUntil(int id){
+        int position = getPosOfCurPlayer();
+        while(monopolyTiles[getPosOfCurPlayer()].getTileType()!=id){
+            position++;
+            if(position>NUMBEROFTILES){
+                position=1;
+            }
+        }
+        moveTo(position);
+    }
+    void moveTo(int n){ //TODO: Test this method
+        int moveBy=n-getPosOfCurPlayer();
+        if(moveBy<0){
+            moveBy+=NUMBEROFTILES;
+        }
+        moveForward(moveBy);
     }
     void moveForward(int n){
         positionOfPlayers[curPlayer]+=n;
@@ -56,9 +90,12 @@ public class ISP_Joshua{
             positionOfPlayers[curPlayer]-=NUMBEROFTILES;
         }
     }
+    void transferMoney(int amount,int player1,int player2){
+        balance[player1]-=amount;
+        balance[player2]+=amount;
+    }
     void transferMoney(int amount,int player){  //Transfer money from curplayer to player
-        balance[curPlayer]-=amount;
-        balance[player]+=amount;
+        transferMoney(amount,curPlayer,player);
     }
     void addMoney(int amount){  //This will have an animation added
         balance[curPlayer]+=amount;
@@ -66,15 +103,58 @@ public class ISP_Joshua{
     void removeMoney(int amount){  //This will have an animation added
         balance[curPlayer]-=amount;
     }
-    void runAuction(Tile land){ //TODO: Run auction for property
-
+    void runAuction(OwnableTile land){ //TODO: Run auction for property
+        String info = land.getFullInfo();
+        boolean canBid[] = new boolean[numOfPlayers];
+        Arrays.fill(canBid,true);
+        int numberOfBidders=numOfPlayers;
+        int currentBid=10;
+        int winningBidId=0;
+        int currentBidder=curPlayer;
+        while(true){
+            if(canBid[currentBidder]){
+                int choice = Util.optionDialog("The current bid is $"+currentBid+".\n"+
+                                                "Currently winning: "+nameOfPlayer[winningBidId], "Auction",new String[] {"Bid","Fold"});
+                if(choice==0){
+                    choice=Util.queryInt("The current bid is $"+currentBid+".\n"+
+                                        "Currently winning: "+nameOfPlayer[winningBidId], "Please bid more than the current amount and make sure you have enough money to bid", "Auction", currentBid+1, balance[currentBidder]);
+                    currentBid=choice;
+                    winningBidId=currentBidder;
+                }else if(choice==1){
+                    canBid[currentBidder]=false;
+                    numberOfBidders--;
+                }
+            }
+            if(numberOfBidders==1)break;
+            currentBidder++;
+            if(currentBidder>numOfPlayers) currentBidder-=numOfPlayers;
+        }
+        land.buyProperty(this,currentBid,currentBidder);
     }
-    void addToInventory(Tile land){
+    void addToInventory(OwnableTile land){
         //Add tile to inventory to make it easier to design ui for buying/selling/trading property
         //This also may make it easier to do some searching even though it may be done in a few extra lines
+        playerInventory[curPlayer].add(land);
+    }
+    int numberOfTilesOwned(int id){
+        int numberOfTilesWithSameId=0;
+        for(OwnableTile t:playerInventory[curPlayer]){
+            if (t.getOwnerId()==curPlayer&&((Tile)t).getTileType() == id) {
+                numberOfTilesWithSameId++;
+            }
+        }
+        return numberOfTilesWithSameId;
     }
     int getBalance(){
         return balance[curPlayer];
+    }
+    void payTax(int amount){
+        balance[curPlayer]-=amount;
+        bankAmount+=amount;
+    }
+    void collectTax(){
+        balance[curPlayer]+=bankAmount;
+        bankAmount=0;
     }
     void nextTurn(){
         curPlayer++;
@@ -84,7 +164,16 @@ public class ISP_Joshua{
         return positionOfPlayers[curPlayer];
     }
     void sendToJail(){
-
+        int posOfJailZone=0;
+        for(int i=1; i<=NUMBEROFTILES; i++){
+            if(monopolyTiles[i].getTileType()==9){
+                posOfJailZone=i;
+                break;
+            }
+        }
+        positionOfPlayers[curPlayer]=posOfJailZone;
+        inJail[curPlayer]=true;
+        turnsInJail[curPlayer]=0;
     }
     void display(){
         int concurrentDoubles=0;
@@ -92,6 +181,28 @@ public class ISP_Joshua{
         while(true){
             c.println("Waiting for input");
             c.println("---------------------------");
+            if(inJail[curPlayer]){
+                while(true){
+                    int choice=Util.queryInt("You are in Jail. Choose an option\n"+
+                                            "1: Roll dice\n"+
+                                            "2: Use get out of jail card",
+                                            "Please choose option 1 or 2.","JAIL", 1, 2);
+                    if(choice==1){
+                        rollDice();
+                        if(diceOne==diceTwo||turnsInJail[curPlayer]==3){
+                            inJail[curPlayer]=false;
+                        }
+                        turnsInJail[curPlayer]++;
+                    }else{
+                        if(hasGetOutOfJail[curPlayer]){
+                            inJail[curPlayer]=false;
+                            hasGetOutOfJail[curPlayer]=true;
+                        }else{
+                            Util.messageDialog("You do not have a get out of jail card!","JAIL");
+                        }
+                    }
+                }
+            }
             rollDice();
             c.getChar();
             c.println("You rolled a "+diceOne+" and a "+diceTwo);
@@ -251,6 +362,22 @@ public class ISP_Joshua{
             e.printStackTrace();
             System.exit(1);
         }
+        BufferedReader chance=null,communityChest=null;
+        try{
+            chance = new BufferedReader(new FileReader(new File("assets\\Chance.txt")));
+        }catch(Exception e){
+            System.out.println("Cannot open Chance.txt, file does not exist");
+            e.printStackTrace();
+            System.exit(1);
+        }
+        try{
+            communityChest = new BufferedReader(new FileReader(new File("assets\\CommunityChest.txt")));
+        }catch(Exception e){
+            System.out.println("Cannot open CommunityChest.txt, file does not exist");
+            e.printStackTrace();
+            System.exit(1);
+        }
+        while(chance.lines())
         //TODO: Also load the community chest and chance cards into array
     }
     

@@ -2,7 +2,7 @@ public class CommunityChestCard{    //TODO: Clean up code from removing the Tile
     String message;
     CardLabels operation;
     int value1,value2;
-    CommunityChest(String input){
+    CommunityChestCard(String input){
         String portions[] = input.split("&");
         message=portions[0];
         operation=CardLabels.valueOf(portions[1]);
@@ -28,26 +28,30 @@ public class CommunityChestCard{    //TODO: Clean up code from removing the Tile
     public void executeTile(ISP_Joshua j){
         switch(operation){
             case MOVETO:
-
-                break;`
+                j.moveTo(value1);
+                break;
             case ADD:
-
-                break;`
+                j.addMoney(value1);
+                break;
             case REMOVE:
-
-                break;`
+                j.payTax(value1);
+                break;
             case GETOUT:
-
-                break;`
+                j.addGetOutOfJail();
+                break;
             case GOTOJAIL:
-
-                break;`
+                j.sendToJail();
+                break;
             case MAKEHIMLOSE:
 
-                break;`
+                break;
             case GETPLAYERS:
-
-                break;`
+                for(int i=1; i<=j.numOfPlayers; i++){
+                    if(i!=j.curPlayer){
+                        j.transferMoney(value1, i,j.curPlayer);
+                    }
+                }
+                break;
         }
     }
     public int getTileType(){

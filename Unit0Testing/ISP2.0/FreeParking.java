@@ -5,6 +5,7 @@ public class FreeParking implements Tile{
     public void executeTile(ISP_Joshua j){
         //Remove money from bank
         //Put into player
+        j.collectTax();
     }
     public int getTileType(){
         return 7;

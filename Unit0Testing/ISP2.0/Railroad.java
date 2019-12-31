@@ -1,5 +1,4 @@
-public class Railroad implements Tile{
-    static final int NOTOWNED=0;
+public class Railroad implements Tile,OwnableTile{
     String name;
     int cost;
     int unMortgageValue;
@@ -19,14 +18,14 @@ public class Railroad implements Tile{
             rentCost[i]=Integer.parseInt(portions[i+2]);
         }
     }
-    void buyProperty(ISP_Joshua j,int amount){
+    public void buyProperty(ISP_Joshua j,int amount,int playerId){
         j.removeMoney(amount);
-        ownerId=j.curPlayer;
+        ownerId=playerId;
         j.addToInventory(this);
     } 
     void payRent(ISP_Joshua j){
         //TODO: Get number of railroads owned
-        int numberOfRails=1;
+        int numberOfRails=j.numberOfTilesOwned(3);
         j.transferMoney(rentCost[numberOfRails],ownerId);
     }
     public void executeTile(ISP_Joshua j){
@@ -39,7 +38,7 @@ public class Railroad implements Tile{
                                     //TODO: add an option to disable auctions
             if(choice==1){
                 if(j.getBalance()>=cost){
-                    buyProperty(j,cost);
+                    buyProperty(j,cost,j.curPlayer);
                     return;
                 }else{
                     Util.messageDialog("You do not have enough money,\n"+
@@ -58,6 +57,25 @@ public class Railroad implements Tile{
     }
     public String getInfo(){
         return name;    //Maybe need other info such of money and such.
+    }
+    public void mortgage(){
+        //We'll need to see what to do here
+    }
+    public void unMortgage(){
+        //We'll see what we need to do here
+    }
+    public void tranferOwnership(int toPlayer){
+        ownerId=toPlayer;
+    }
+    public int getOwnerId(){
+        return ownerId;
+    }
+    public String getFullInfo(){
+        return name+'\n'+
+        "Rent: $"+rentCost[1]+'\n'+
+        "If 2 Stations are owned: $"+rentCost[2]+'\n'+
+        "If 3 Stations are owned: $"+rentCost[3]+'\n'+
+        "If 4 Stations are owned: $"+rentCost[4]+'\n';
     }
 }
 /*

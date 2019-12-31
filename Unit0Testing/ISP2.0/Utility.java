@@ -1,5 +1,4 @@
-public class Utility implements Tile{
-    static final int NOTOWNED=0;
+public class Utility implements Tile,OwnableTile{
     String name;
     int cost;
     int unMortgage;
@@ -14,14 +13,13 @@ public class Utility implements Tile{
         multiplier1=Integer.parseInt(portion[3]);
         multiplier2=Integer.parseInt(portion[4]);
     }
-    void buyProperty(ISP_Joshua j,int amount){
+    public void buyProperty(ISP_Joshua j,int amount,int playerId){
         j.removeMoney(amount);
-        ownerId=j.curPlayer;
+        ownerId=playerId;
         j.addToInventory(this);
     }
     void payRent(ISP_Joshua j){
-        //TODO: Find how many utilities they own. This can utilize the inventory
-        int utilitiesOwned=2;
+        int utilitiesOwned=j.numberOfTilesOwned(10);
         int totalCost=j.diceOne+j.diceTwo;
         //TODO: Add some way to display how much they have to pay
         if(utilitiesOwned==1){
@@ -40,7 +38,7 @@ public class Utility implements Tile{
                                     //TODO: add an option to disable auctions
             if(choice==1){
                 if(j.getBalance()>=cost){
-                    buyProperty(j,cost);
+                    buyProperty(j,cost,j.curPlayer);
                     return;
                 }else{
                     Util.messageDialog("You do not have enough money,\n"+
@@ -59,6 +57,24 @@ public class Utility implements Tile{
     }
     public String getInfo(){
         return name;
+    }
+    public void mortgage(){
+
+    }
+    public void unMortgage(){
+        
+    }
+    public void tranferOwnership(int toPlayer){
+        ownerId=toPlayer;
+    }
+    public int getOwnerId(){
+        return ownerId;
+    }
+    public String getFullInfo(){
+        return name+'\n'+'\n'+
+            "If one Utility is owned, rent is "+multiplier1+" times amount shown on dice."+'\n'+
+            "If both Utilities are owned, rent is "+multiplier2+" times amount shown on dice";
+
     }
 }
 /*

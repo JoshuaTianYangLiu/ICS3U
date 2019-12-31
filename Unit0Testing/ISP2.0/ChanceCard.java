@@ -2,7 +2,7 @@ public class ChanceCard{    //TODO: Clean up code from removing the Tile interfa
     String message;
     CardLabels operation;
     int value1,value2;
-    ChanceCards(String input){
+    ChanceCard(String input){
         //We need to parse the string and assign the corresponding info
         //Will be seperated by &
         String portions[] = input.split("&");
@@ -40,10 +40,10 @@ public class ChanceCard{    //TODO: Clean up code from removing the Tile interfa
                 j.addGetOutOfJail();
                 break;
             case NEARRAIL:
-                // for(int )
+                j.moveUntil(3);
                 break;
             case NEARUTIL:
-
+                j.moveUntil(10);
                 break;
             case MOVETO:
                 j.moveTo(value1);
@@ -53,7 +53,7 @@ public class ChanceCard{    //TODO: Clean up code from removing the Tile interfa
                 break;
             case REMOVE:
                 //Remove money, figure out what to do
-                j.removeMoneyToBank(value1);
+                j.payTax(value1);
                 break;
             case MAKEHIMLOSE:
                 //Pay __ for each house and __ for each hotel
@@ -67,15 +67,12 @@ public class ChanceCard{    //TODO: Clean up code from removing the Tile interfa
                 }
                 break;
             case MOVEBACK:
+                j.moveBack(3);
                 break;
             case GOTOJAIL:
-                j.goToJail();
+                j.sendToJail();
                 break;
             }
-    }
-    public static void main(String[] args){
-        ChanceCards c= new ChanceCards("Advance to Go (Collect $200)&MOVETO&0");
-        System.out.println(c.getMessage());
     }
 }
 /*

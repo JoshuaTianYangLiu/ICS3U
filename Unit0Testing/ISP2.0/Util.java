@@ -18,6 +18,16 @@ public class Util{
             }
         }
     }
+    static int optionDialog(String message, String title,String[] choices){
+        int retValue=0;
+        while(true){
+            try{
+                retValue=JOptionPane.showOptionDialog(null, message, title, JOptionPane.DEFAULT_OPTION,JOptionPane.PLAIN_MESSAGE, null,choices,choices[0]);
+                break;
+            }catch(Exception e){}
+        }
+        return retValue;
+    }
     static void messageDialog(String message,String title){
         JOptionPane.showMessageDialog(null, message,title,JOptionPane.WARNING_MESSAGE);
     }

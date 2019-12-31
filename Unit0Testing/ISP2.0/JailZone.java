@@ -1,6 +1,6 @@
 public class JailZone implements Tile{
     public void executeTile(ISP_Joshua j){
-        //Something
+        //Something not sure what to put here
     }
     public int getTileType(){
         return 9;

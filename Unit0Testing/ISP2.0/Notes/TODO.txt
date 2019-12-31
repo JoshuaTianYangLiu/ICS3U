@@ -1,0 +1,11 @@
+Implement,
+
+Auction
+Community chest and Chance
+Jail                                                            DONE
+Mortgage and unmortgage
+Buy/Sell houses
+Add chance/community chest commands to files
+
+I should do,
+Better way to display info for better debugging
