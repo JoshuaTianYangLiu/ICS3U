@@ -11,7 +11,7 @@ public class Property implements Tile,OwnableTile{
     static final int MORTGAGE=-1;
     String name;
     int propertyColour;     //start from 2. 1 for railroad 0 for utility
-    int propertyCost;
+    int cost;
     int tierLevel;  //0=rent -1= morgage, >0 houses/ hotels
     int tierCost[] = new int[6];
     int houseCost;
@@ -29,12 +29,12 @@ public class Property implements Tile,OwnableTile{
         propertyColour=Integer.parseInt(portions[1]);
         houseCost=Integer.parseInt(portions[2]);
         hotelCost=Integer.parseInt(portions[3]);
-        propertyCost=Integer.parseInt(portions[4]);
+        cost=Integer.parseInt(portions[4]);
         unMortgageValue = Integer.parseInt(portions[5]);
         for(int i=0; i<6; i++){
             tierCost[i]=Integer.parseInt(portions[6+i]);
         }
-        mortgageValue = propertyCost/2;
+        mortgageValue = cost/2;
         //Monopoly rules says that mortgage value is half the cost of the property cost
         //selling anything is half the cost right?????
     }
@@ -45,6 +45,8 @@ public class Property implements Tile,OwnableTile{
         j.addToInventory(this);
     }
     void payRent(ISP_Joshua j){
+        Util.messageDialog("You landed on "+name+"\n"+
+                            "Pay "+j.nameOfPlayer[ownerId]+" $"+tierCost[tierLevel]+".","Pay rent on "+name);
         j.transferMoney(tierCost[tierLevel],ownerId);
     }
     void buyHouse(ISP_Joshua j){    //In my words, move up a tier level
@@ -58,15 +60,17 @@ public class Property implements Tile,OwnableTile{
         //This method if for just what should happen when a person lands on the tile
         //Meaning this will only have the option to buy and pay rent
         if(ownerId==NOTOWNED){  //If not owned
-            int choice = Util.queryInt("Please choose an option:\n"+
+            int choice = Util.queryInt(getFullInfo()+'\n'+
+                                    "-------------------------\n"+
+                                    "Please choose an option:\n"+
                                     "1: Buy property\n"+
                                     "2: Put up for auction",
                                     "Please enter a valid option 1,2",
                                     name,1,2);
                                     //TODO: add an option to disable auctions
             if(choice==1){
-                if(j.getBalance()>=propertyCost){
-                    buyProperty(j,propertyCost,j.curPlayer);
+                if(j.getBalance()>=cost){
+                    buyProperty(j,cost,j.curPlayer);
                     return;
                 }else{
                     Util.messageDialog("You do not have enough money,\n"+
@@ -142,8 +146,10 @@ public class Property implements Tile,OwnableTile{
     }
     public String getFullInfo(){
         return 
-            "Colour set: "+getColourName()+
+            "Cost to buy $"+cost+'\n'+
+            "--------------------\n"+
             name+'\n'+
+            "Colour set: "+getColourName()+'\n'+
             "Rent: $"+tierCost[0]+'\n'+
             "Rent with 1 house: $"+tierCost[1]+'\n'+
             "Rent with 2 house: $"+tierCost[2]+'\n'+
@@ -166,7 +172,7 @@ Next off, The chance card!
 As to my contest checker, taking a break from that, need a better way to parse
 */
 /*
-name|group|houseCost|hotelCost|propertyCost|unmortgagevalue|tierCost
+name|group|houseCost|hotelCost|cost|unmortgagevalue|tierCost
 Name of Property
 Property group
 Rent

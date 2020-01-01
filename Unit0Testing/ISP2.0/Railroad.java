@@ -25,12 +25,15 @@ public class Railroad implements Tile,OwnableTile{
     } 
     void payRent(ISP_Joshua j){
         //TODO: Get number of railroads owned
-        int numberOfRails=j.numberOfTilesOwned(3);
+        int numberOfRails=j.numberOfTilesOwned(3,ownerId);
+        Util.messageDialog("You landed on "+name+"\n"+
+                            "Pay "+j.nameOfPlayer[ownerId]+" $"+rentCost[numberOfRails]+".","Pay rent on "+name);
         j.transferMoney(rentCost[numberOfRails],ownerId);
     }
     public void executeTile(ISP_Joshua j){
         if(ownerId==NOTOWNED){  //If not owned
-            int choice = Util.queryInt("Please choose an option:\n"+
+            int choice = Util.queryInt(getFullInfo()+"\n"+
+                                    "Please choose an option:\n"+
                                     "1: Buy railroad\n"+
                                     "2: Put up for auction",
                                     "Please enter a valid option 1,2",
@@ -71,7 +74,10 @@ public class Railroad implements Tile,OwnableTile{
         return ownerId;
     }
     public String getFullInfo(){
-        return name+'\n'+
+        return 
+        "Cost to buy $"+cost+'\n'+
+        "--------------------\n"+
+        name +'\n'+
         "Rent: $"+rentCost[1]+'\n'+
         "If 2 Stations are owned: $"+rentCost[2]+'\n'+
         "If 3 Stations are owned: $"+rentCost[3]+'\n'+

@@ -2,10 +2,10 @@ public class ChanceCard{    //TODO: Clean up code from removing the Tile interfa
     String message;
     CardLabels operation;
     int value1,value2;
-    ChanceCard(String input){
+    ChanceCard(String input)throws Exception{
         //We need to parse the string and assign the corresponding info
         //Will be seperated by &
-        String portions[] = input.split("&");
+        String portions[] = input.split("\\|");
         message=portions[0];
         operation=CardLabels.valueOf(portions[1]);
         switch(operation){
@@ -60,7 +60,7 @@ public class ChanceCard{    //TODO: Clean up code from removing the Tile interfa
 
                 break;
             case GIVEPLAYERS:
-                for(int i=1; i<=j.numOfPlayers; i++){
+                for(int i=1; i<j.numOfPlayers; i++){
                     if(i!=j.curPlayer){
                         j.transferMoney(value1, i);
                     }

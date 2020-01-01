@@ -19,8 +19,12 @@ public class Utility implements Tile,OwnableTile{
         j.addToInventory(this);
     }
     void payRent(ISP_Joshua j){
-        int utilitiesOwned=j.numberOfTilesOwned(10);
+        int utilitiesOwned=j.numberOfTilesOwned(10,ownerId);
         int totalCost=j.diceOne+j.diceTwo;
+        Util.messageDialog("You landed on "+name+"\n"+
+                            "Pay "+j.nameOfPlayer[ownerId]+" $("+j.diceOne+" + "+j.diceTwo+")*"+
+                            (utilitiesOwned==1?multiplier1:multiplier2)+"= $"+
+                            ((utilitiesOwned==1?multiplier1:multiplier2)*totalCost)+".","Pay rent on "+name);
         //TODO: Add some way to display how much they have to pay
         if(utilitiesOwned==1){
             j.transferMoney(multiplier1*totalCost,ownerId);
@@ -30,7 +34,8 @@ public class Utility implements Tile,OwnableTile{
     }
     public void executeTile(ISP_Joshua j){
         if(ownerId==NOTOWNED){  //If not owned
-            int choice = Util.queryInt("Please choose an option:\n"+
+            int choice = Util.queryInt(getFullInfo()+'\n'+
+                                    "Please choose an option:\n"+
                                     "1: Buy utility\n"+
                                     "2: Put up for auction",
                                     "Please enter a valid option 1,2",
@@ -71,7 +76,10 @@ public class Utility implements Tile,OwnableTile{
         return ownerId;
     }
     public String getFullInfo(){
-        return name+'\n'+'\n'+
+        return 
+            "Cost to buy $"+cost+'\n'+
+            "--------------------\n"+
+            name +'\n'+
             "If one Utility is owned, rent is "+multiplier1+" times amount shown on dice."+'\n'+
             "If both Utilities are owned, rent is "+multiplier2+" times amount shown on dice";
 

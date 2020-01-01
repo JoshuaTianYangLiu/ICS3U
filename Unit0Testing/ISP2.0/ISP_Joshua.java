@@ -107,16 +107,22 @@ public class ISP_Joshua{
         String info = land.getFullInfo();
         boolean canBid[] = new boolean[numOfPlayers];
         Arrays.fill(canBid,true);
-        int numberOfBidders=numOfPlayers;
+        int numberOfBidders=numOfPlayers-1; //numOfPlayers-1 is the true number 
         int currentBid=10;
         int winningBidId=0;
         int currentBidder=curPlayer;
         while(true){
             if(canBid[currentBidder]){
-                int choice = Util.optionDialog("The current bid is $"+currentBid+".\n"+
+                int choice = Util.optionDialog(land.getFullInfo()+"\n"+
+                                                "-------------------------------------"+"\n"+
+                                                "Currently Bidding: "+nameOfPlayer[currentBidder]+".\n"+
+                                                "The current bid is $"+currentBid+".\n"+
                                                 "Currently winning: "+nameOfPlayer[winningBidId], "Auction",new String[] {"Bid","Fold"});
                 if(choice==0){
-                    choice=Util.queryInt("The current bid is $"+currentBid+".\n"+
+                    choice=Util.queryInt(land.getFullInfo()+"\n"+
+                                        "-------------------------------------"+"\n"+
+                                        "Currently Bidding: "+nameOfPlayer[currentBidder]+".\n"+
+                                        "The current bid is $"+currentBid+".\n"+
                                         "Currently winning: "+nameOfPlayer[winningBidId], "Please bid more than the current amount and make sure you have enough money to bid", "Auction", currentBid+1, balance[currentBidder]);
                     currentBid=choice;
                     winningBidId=currentBidder;
@@ -131,15 +137,27 @@ public class ISP_Joshua{
         }
         land.buyProperty(this,currentBid,currentBidder);
     }
+    void pickChanceCard(){
+        Util.messageDialog(chancePile.peek().getInfo(),"Chance");
+        chancePile.peek().executeTile(this);
+        chancePile.add(chancePile.peek());
+        chancePile.remove();
+    }
+    void pickCommunityChestCard(){
+        Util.messageDialog(communityChestPile.peek().getInfo(),"Community Chest");
+        communityChestPile.peek().executeTile(this);
+        communityChestPile.add(communityChestPile.peek());
+        communityChestPile.remove();
+    }
     void addToInventory(OwnableTile land){
         //Add tile to inventory to make it easier to design ui for buying/selling/trading property
         //This also may make it easier to do some searching even though it may be done in a few extra lines
         playerInventory[curPlayer].add(land);
     }
-    int numberOfTilesOwned(int id){
+    int numberOfTilesOwned(int id,int playerId){
         int numberOfTilesWithSameId=0;
-        for(OwnableTile t:playerInventory[curPlayer]){
-            if (t.getOwnerId()==curPlayer&&((Tile)t).getTileType() == id) {
+        for(OwnableTile t:playerInventory[playerId]){
+            if (t.getOwnerId()==playerId&&((Tile)t).getTileType() == id) {
                 numberOfTilesWithSameId++;
             }
         }
@@ -178,9 +196,11 @@ public class ISP_Joshua{
     void display(){
         int concurrentDoubles=0;
         resetBoard();
+        nameOfPlayer[1]="Player 1 (CAT)";   //TODO: TEMP LINES
+        nameOfPlayer[2]="Player 2 (SHIP)";
+        beginTurn:
         while(true){
-            c.println("Waiting for input");
-            c.println("---------------------------");
+            c.println(nameOfPlayer[curPlayer]);
             if(inJail[curPlayer]){
                 while(true){
                     int choice=Util.queryInt("You are in Jail. Choose an option\n"+
@@ -189,10 +209,22 @@ public class ISP_Joshua{
                                             "Please choose option 1 or 2.","JAIL", 1, 2);
                     if(choice==1){
                         rollDice();
-                        if(diceOne==diceTwo||turnsInJail[curPlayer]==3){
+                        if(diceOne==diceTwo){
+                            Util.messageDialog("You rolled a "+diceOne+" and "+diceTwo+".\n"+
+                                                "You are released!", "JAIL");
                             inJail[curPlayer]=false;
+                            break;
+                        }else{
+                            Util.messageDialog("You rolled a "+diceOne+" and "+diceTwo+".\n"+
+                                                "Still in jail.", "JAIL");
+                            turnsInJail[curPlayer]++;
+                            if(turnsInJail[curPlayer]==3){
+                                inJail[curPlayer]=false;
+                            }
+                            nextTurn();
+                            c.clear();
+                            continue beginTurn;
                         }
-                        turnsInJail[curPlayer]++;
                     }else{
                         if(hasGetOutOfJail[curPlayer]){
                             inJail[curPlayer]=false;
@@ -203,36 +235,69 @@ public class ISP_Joshua{
                     }
                 }
             }
+            c.println("--------------------");
+            c.println("Press any key to roll");
             rollDice();
             c.getChar();
-            c.println("You rolled a "+diceOne+" and a "+diceTwo);
+            c.println();
+            c.println("--------------------------");
+            c.println("| You rolled a "+diceOne+" and a "+diceTwo+" |");
+            c.println("--------------------------");
+            c.println();
             if(diceOne==diceTwo){
                 concurrentDoubles++;
-                c.println("Doubles!");
+                if(concurrentDoubles==3){   //Roll three doubles rule
+                    c.println("----------------------------------------------");
+                    c.println("| You rolled 3 doubles in a row, GO TO JAIL! |");
+                    c.println("----------------------------------------------");
+                    sendToJail();
+                    nextTurn();
+                    Util.messageDialog("Press any key to continue", "MONOPOLY");
+                    concurrentDoubles=0;
+                    c.clear();
+                    continue;
+                }
+                c.println("------------");
+                c.println("| Doubles! |");
+                c.println("------------");
             }
-            c.println("---------------------------");
-            c.println("You were on "+monopolyTiles[getPosOfCurPlayer()].getInfo());
-            if(concurrentDoubles==3){   //Roll three doubles rule
-                sendToJail();
-                nextTurn();
-                continue;
-            }else{
-                moveForward(diceOne+diceTwo);
-            }
-            c.println("You are now on "+monopolyTiles[getPosOfCurPlayer()].getInfo());
+            c.println("Was on "+monopolyTiles[getPosOfCurPlayer()].getInfo());
+            c.println("-----");
+            c.println("  |  ");
+            c.println("  v  ");
+            moveForward(diceOne+diceTwo);
+            c.println("Now on "+monopolyTiles[getPosOfCurPlayer()].getInfo());
             monopolyTiles[getPosOfCurPlayer()].executeTile(this);
+            c.println();
+            c.println("----------------------------------------");
+            c.println("BALANCE:");
+            for(int i=1; i<numOfPlayers; i++){
+                c.print(nameOfPlayer[i]+":",20);
+                c.println(balance[i]+"",10);
+            }
+            Util.messageDialog("Press any key to continue", "MONOPOLY");
             if(diceOne==diceTwo){
-                c.println("Roll again");
+                c.clear();
+                c.println("--------------");
+                c.println("| Roll again |");
+                c.println("--------------");
+                c.println();
             }else{
                 c.println("Next turn");
+                c.clear();
                 concurrentDoubles=0;
                 nextTurn();
             }
         }
     }
     void rollDice(){
-        diceOne=(int)(6*Math.random()+1);
-        diceTwo=(int)(6*Math.random()+1);
+        if(inJail[curPlayer]){
+            diceOne=(int)(6*Math.random()+1);
+            diceTwo=(int)(6*Math.random()+1);
+        }else{
+            diceOne=6;
+            diceTwo=6;
+        }
     }
     void loadAssets(){
         /*
@@ -249,7 +314,7 @@ public class ISP_Joshua{
         9	JAILZONE
         10	UTILITY
         */
-        BufferedReader boardTileId=null,properties=null,railroad=null,utility=null;
+        BufferedReader boardTileId=null,properties=null,railroad=null,utility=null,tax=null;
         //Two options UK and US
         String boardLanguage="UK";
 
@@ -261,20 +326,14 @@ public class ISP_Joshua{
             System.exit(1);
         }
         try{
-            if(boardLanguage.equals("US"))
-                properties = new BufferedReader(new FileReader(new File("assets\\PropertiesUS.txt")));
-            else
-                properties = new BufferedReader(new FileReader(new File("assets\\PropertiesUK.txt")));
+            properties = new BufferedReader(new FileReader(new File("assets\\Properties"+boardLanguage+".txt")));
         }catch(Exception e){
             System.out.println("Properties.txt not found, please include file");
             e.printStackTrace();
             System.exit(1);
         }
         try{
-            if(boardLanguage.equals("US"))
-                railroad = new BufferedReader(new FileReader(new File("assets\\RailroadUS.txt")));
-            else
-                railroad = new BufferedReader(new FileReader(new File("assets\\RailroadUK.txt")));
+            railroad = new BufferedReader(new FileReader(new File("assets\\Railroad"+boardLanguage+".txt")));
         }catch(Exception e){
             System.out.println("Railroad.txt not found, please include file");
             e.printStackTrace();
@@ -284,6 +343,13 @@ public class ISP_Joshua{
             utility = new BufferedReader(new FileReader(new File("assets\\Utility.txt")));
         }catch(Exception e){
             System.out.println("Utility.txt not found, please include file");
+            e.printStackTrace();
+            System.exit(1);
+        }
+        try{
+            tax = new BufferedReader(new FileReader(new File("assets\\Tax.txt")));
+        }catch(Exception e){
+            System.out.println("Tax.txt not found, please include file");
             e.printStackTrace();
             System.exit(1);
         }
@@ -312,7 +378,6 @@ public class ISP_Joshua{
                             //TODO: Differentiate the error between readline and parsing
                             System.exit(1);
                         }
-                        //TODO: Add file for railroad
                         break;
                     case "4":
                         monopolyTiles[i]=new ChanceTile();
@@ -321,7 +386,14 @@ public class ISP_Joshua{
                         monopolyTiles[i]=new CommunityChestTile();
                         break;
                     case "6":
-                        monopolyTiles[i]=new Tax();
+                        try{
+                            monopolyTiles[i]=new Tax(tax.readLine());
+                        }catch(Exception e){
+                            System.out.println("Something wrong happened on file reading Tax.txt and parsing\n Stack trace: ");
+                            e.printStackTrace();
+                            //TODO: Differentiate the error between readline and parsing
+                            System.exit(1);
+                        }
                         break;
                     case "7":
                         monopolyTiles[i]=new FreeParking();
@@ -364,7 +436,7 @@ public class ISP_Joshua{
         }
         BufferedReader chance=null,communityChest=null;
         try{
-            chance = new BufferedReader(new FileReader(new File("assets\\Chance.txt")));
+            chance = new BufferedReader(new FileReader(new File("assets\\Chance"+boardLanguage+".txt")));
         }catch(Exception e){
             System.out.println("Cannot open Chance.txt, file does not exist");
             e.printStackTrace();
@@ -377,7 +449,59 @@ public class ISP_Joshua{
             e.printStackTrace();
             System.exit(1);
         }
-        while(chance.lines())
+        String inputLine="",entireInput="";
+        try{
+            while((inputLine=chance.readLine())!=null){
+                entireInput+=inputLine+'\n';
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+            System.exit(1);
+        }
+        String chanceArr[] = entireInput.split("\n");
+        entireInput="";
+        try{
+            while((inputLine=communityChest.readLine())!=null){
+                entireInput+=inputLine+'\n';
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+            System.exit(1);
+        }
+        String communityChestArr[]= entireInput.split("\n");
+        for(int i=0; i<1000; i++){
+            int a=(int)(chanceArr.length*Math.random());
+            int b=(int)(chanceArr.length*Math.random());
+            String swappingVar=chanceArr[a];
+            chanceArr[a]=chanceArr[b];
+            chanceArr[b]=swappingVar;
+
+            a=(int)(communityChestArr.length*Math.random());
+            b=(int)(communityChestArr.length*Math.random());
+            swappingVar=communityChestArr[a];
+            communityChestArr[a]=communityChestArr[b];
+            communityChestArr[b]=swappingVar;
+        }
+        for(int i=0; i<chanceArr.length; i++){
+            try{
+            chancePile.add(new ChanceCard(chanceArr[i]));
+            }catch(Exception e){
+                System.out.println("Parsing error in ChanceCard.java make sure each line of ChanceCards.txt is valid");
+                System.out.println("Error parsing line "+chanceArr[i]);
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }
+        for(int i=0; i<communityChestArr.length; i++){
+            try{
+                communityChestPile.add(new CommunityChestCard(communityChestArr[i]));
+            }catch(Exception e){
+                System.out.println("Parsing error in CommunityChest.java make sure each line of CommunityChest.txt is valid");
+                System.out.println("Error parsing line "+communityChestArr[i]);
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }
         //TODO: Also load the community chest and chance cards into array
     }
     

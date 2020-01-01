@@ -1,11 +1,14 @@
 Implement,
 
-Auction
-Community chest and Chance
+Auction                                                         DONE
+Community chest and Chance                                      DONE NEEDS TESTING
 Jail                                                            DONE
 Mortgage and unmortgage
 Buy/Sell houses
-Add chance/community chest commands to files
+Add chance/community chest commands to files                    DONE
+randomize the order of players when the game starts
+
 
 I should do,
-Better way to display info for better debugging
+Better way to display info for better debugging                 DONE
+Add a error trapping display method to Util.java

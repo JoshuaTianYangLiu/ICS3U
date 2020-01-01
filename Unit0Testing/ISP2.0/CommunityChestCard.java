@@ -3,7 +3,7 @@ public class CommunityChestCard{    //TODO: Clean up code from removing the Tile
     CardLabels operation;
     int value1,value2;
     CommunityChestCard(String input){
-        String portions[] = input.split("&");
+        String portions[] = input.split("\\|");
         message=portions[0];
         operation=CardLabels.valueOf(portions[1]);
         switch(operation){

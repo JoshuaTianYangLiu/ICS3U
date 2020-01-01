@@ -4,6 +4,7 @@ public class ChanceTile implements Tile{
     }
     public void executeTile(ISP_Joshua j){
         //Run some j.___() so choose card
+        j.pickChanceCard();
     }
     public int getTileType(){
         return 4;

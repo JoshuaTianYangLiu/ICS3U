@@ -4,6 +4,7 @@ public class CommunityChestTile implements Tile{
     }
     public void executeTile(ISP_Joshua j){
         //Same thing as ChanceTile
+        j.pickCommunityChestCard();
     }
     public int getTileType(){
         return 5;

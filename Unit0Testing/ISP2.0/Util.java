@@ -29,6 +29,6 @@ public class Util{
         return retValue;
     }
     static void messageDialog(String message,String title){
-        JOptionPane.showMessageDialog(null, message,title,JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(null, message,title,JOptionPane.PLAIN_MESSAGE);
     }
 }
