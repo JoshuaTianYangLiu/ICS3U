@@ -9,8 +9,8 @@ Add chance/community chest commands to files                    DONE
 randomize the order of players when the game starts             DONE NEEDS TESTING
 Trading
 Implement MakeThemLose                                          DONE NEEDS TESTING
-Reimplement Chance/Community Chest to work without queue
-Remove arraylist from player inventory. Will just search through every tile instead
+Reimplement Chance/Community Chest to work without queue        DONE NEEDS TESTING
+Remove arraylist from player inventory. Will just search through every tile instead     DONE
 
 I should do,
 Better way to display info for better debugging                 DONE

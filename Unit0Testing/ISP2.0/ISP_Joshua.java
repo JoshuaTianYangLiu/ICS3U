@@ -137,28 +137,14 @@ public class ISP_Joshua{
         land.buyProperty(this,currentBid,currentBidder);
     }
     void pickChanceCard(){
-        
-        System.out.println(chancePile.peek().getInfo());
-        Util.messageDialog(chancePile.peek().getInfo(),"Chance");
-        chancePile.peek().executeTile(this);
-        chancePile.add(chancePile.peek());
-        chancePile.remove();
+        int randCard = (int)(chancePile.length*Math.random());
+        Util.messageDialog(chancePile[randCard].getInfo(),"Chance");
+        chancePile[randCard].executeTile(this);
     }
     void pickCommunityChestCard(){
-        System.out.println(communityChestPile.peek().getInfo());
-        Util.messageDialog(communityChestPile.peek().getInfo(),"Community Chest");
-        communityChestPile.peek().executeTile(this);
-        communityChestPile.add(communityChestPile.peek());
-        communityChestPile.remove();
-    }
-    void addToInventory(OwnableTile land){
-        //TODO: Make sure this can be removed
-        //Add tile to inventory to make it easier to design ui for buying/selling/trading property
-        //This also may make it easier to do some searching even though it may be done in a few extra lines
-        //Downside, Java 1.4's ArrayList is different to Java 8 ArrayList. 
-        //Most likely we need to come up with a different way
-        //Just loop through all board tiles
-        // playerInventory[curPlayer].add(land);
+        int randCard = (int)(communityChestPile.length*Math.random());
+        Util.messageDialog(communityChestPile[randCard].getInfo(),"Community Chest");
+        communityChestPile[randCard].executeTile(this);
     }
     int getNumOfHousesOwned(){
         int retVal=0;
@@ -654,22 +640,11 @@ public class ISP_Joshua{
             System.exit(1);
         }
         String communityChestArr[]= entireInput.split("\n");
-        for(int i=0; i<1000; i++){
-            int a=(int)(chanceArr.length*Math.random());
-            int b=(int)(chanceArr.length*Math.random());
-            String swappingVar=chanceArr[a];
-            chanceArr[a]=chanceArr[b];
-            chanceArr[b]=swappingVar;
-
-            a=(int)(communityChestArr.length*Math.random());
-            b=(int)(communityChestArr.length*Math.random());
-            swappingVar=communityChestArr[a];
-            communityChestArr[a]=communityChestArr[b];
-            communityChestArr[b]=swappingVar;
-        }
+        chancePile=new ChanceCard[chanceArr.length];
+        communityChestPile=new CommunityChestCard[communityChestArr.length];
         for(int i=0; i<chanceArr.length; i++){
             try{
-            chancePile.add(new ChanceCard(chanceArr[i]));
+                chancePile[i]=new ChanceCard(chanceArr[i]);
             }catch(Exception e){
                 System.out.println("Parsing error in ChanceCard.java make sure each line of ChanceCards.txt is valid");
                 System.out.println("Error parsing line "+chanceArr[i]);
@@ -679,7 +654,7 @@ public class ISP_Joshua{
         }
         for(int i=0; i<communityChestArr.length; i++){
             try{
-                communityChestPile.add(new CommunityChestCard(communityChestArr[i]));
+                communityChestPile[i]=new CommunityChestCard(communityChestArr[i]);
             }catch(Exception e){
                 System.out.println("Parsing error in CommunityChest.java make sure each line of CommunityChest.txt is valid");
                 System.out.println("Error parsing line "+communityChestArr[i]);

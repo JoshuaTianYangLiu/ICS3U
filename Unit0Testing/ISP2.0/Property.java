@@ -44,7 +44,6 @@ public class Property implements Tile,OwnableTile{
     public void buyProperty(ISP_Joshua j,int cost,int playerId){    //The property can be bought with different costs due to auctions
         j.removeMoney(cost);
         ownerId=playerId;
-        // j.addToInventory(this);
     }
     void payRent(ISP_Joshua j){
         if(isMortgaged){

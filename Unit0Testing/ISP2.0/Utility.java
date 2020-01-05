@@ -18,7 +18,6 @@ public class Utility implements Tile,OwnableTile{
     public void buyProperty(ISP_Joshua j,int amount,int playerId){
         j.removeMoney(amount);
         ownerId=playerId;
-        // j.addToInventory(this);
     }
     void payRent(ISP_Joshua j){
         if(isMortgaged){
