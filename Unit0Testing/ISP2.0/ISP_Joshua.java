@@ -17,10 +17,9 @@ public class ISP_Joshua{
     int balance[] = new int[numOfPlayers];
     String nameOfPlayer[] = new String[numOfPlayers];
     Tile monopolyTiles[] = new Tile[NUMBEROFTILES+1];
-    ArrayList<OwnableTile> playerInventory[] = new ArrayList[numOfPlayers];
     int diceOne,diceTwo;
-    Queue<ChanceCard> chancePile = new LinkedList<ChanceCard>();
-    Queue<CommunityChestCard> communityChestPile = new LinkedList<CommunityChestCard>();
+    ChanceCard chancePile[];
+    CommunityChestCard communityChestPile[];
     // int propertyToPlayer[] = new int[numOfPlayers];
     // int propertyToHotel[] = new int[numOfPlayers];   //Player can own a max of 1 hotel
     // int propertyToHouse[] = new int[numOfPlayers];  //Player can own a max of __ hotel
@@ -52,12 +51,11 @@ public class ISP_Joshua{
     void resetBoard(){
         curPlayer=1;
 
-        for(int i=0; i<numOfPlayers; i++){
-            playerInventory[i]=new ArrayList<OwnableTile>();
-        }
         Arrays.fill(positionOfPlayers,1);
         Arrays.fill(balance,initialBalance);
         Arrays.fill(hasGetOutOfJail,false);
+        Arrays.fill(inJail,false);
+        Arrays.fill(turnsInJail,0);
     }
     void addGetOutOfJail(){
         hasGetOutOfJail[curPlayer]=true;
@@ -72,6 +70,7 @@ public class ISP_Joshua{
             position++;
             if(position>NUMBEROFTILES){
                 position=1;
+                break;
             }
         }
         moveTo(position);
@@ -112,7 +111,7 @@ public class ISP_Joshua{
         int winningBidId=0;
         int currentBidder=curPlayer;
         while(true){
-            if(canBid[currentBidder]){
+            if(canBid[currentBidder]&&balance[currentBidder]>currentBid){
                 int choice = Util.optionDialog(land.getFullInfo()+"\n"+
                                                 "-------------------------------------"+"\n"+
                                                 "Currently Bidding: "+nameOfPlayer[currentBidder]+".\n"+
@@ -133,32 +132,66 @@ public class ISP_Joshua{
             }
             if(numberOfBidders==1)break;
             currentBidder++;
-            if(currentBidder>numOfPlayers) currentBidder-=numOfPlayers;
+            if(currentBidder==numOfPlayers) currentBidder-=numOfPlayers-1;
         }
         land.buyProperty(this,currentBid,currentBidder);
     }
     void pickChanceCard(){
+        
+        System.out.println(chancePile.peek().getInfo());
         Util.messageDialog(chancePile.peek().getInfo(),"Chance");
         chancePile.peek().executeTile(this);
         chancePile.add(chancePile.peek());
         chancePile.remove();
     }
     void pickCommunityChestCard(){
+        System.out.println(communityChestPile.peek().getInfo());
         Util.messageDialog(communityChestPile.peek().getInfo(),"Community Chest");
         communityChestPile.peek().executeTile(this);
         communityChestPile.add(communityChestPile.peek());
         communityChestPile.remove();
     }
     void addToInventory(OwnableTile land){
+        //TODO: Make sure this can be removed
         //Add tile to inventory to make it easier to design ui for buying/selling/trading property
         //This also may make it easier to do some searching even though it may be done in a few extra lines
-        playerInventory[curPlayer].add(land);
+        //Downside, Java 1.4's ArrayList is different to Java 8 ArrayList. 
+        //Most likely we need to come up with a different way
+        //Just loop through all board tiles
+        // playerInventory[curPlayer].add(land);
+    }
+    int getNumOfHousesOwned(){
+        int retVal=0;
+        for(int i=1; i<=NUMBEROFTILES; i++){
+            if(monopolyTiles[i].getTileType()==2){
+                Property t = (Property)monopolyTiles[i];
+                if(t.getOwnerId()==curPlayer){
+                    if(t.tierLevel!=5)retVal+=t.tierLevel;
+                }
+            }
+        }
+        return retVal;
+    }
+    int getNumOfHotelsOwned(){
+        int retVal=0;
+        for(int i=1; i<=NUMBEROFTILES; i++){
+            if(monopolyTiles[i].getTileType()==2){
+                Property t = (Property)monopolyTiles[i];
+                if(t.getOwnerId()==curPlayer){
+                    if(t.tierLevel==5)retVal++;
+                }
+            }
+        }
+        return retVal;
     }
     int numberOfTilesOwned(int id,int playerId){
         int numberOfTilesWithSameId=0;
-        for(OwnableTile t:playerInventory[playerId]){
-            if (t.getOwnerId()==playerId&&((Tile)t).getTileType() == id) {
-                numberOfTilesWithSameId++;
+        for(int i=1; i<=NUMBEROFTILES; i++){
+            if(monopolyTiles[i].getTileType()==id){
+                OwnableTile t = (OwnableTile)monopolyTiles[i];
+                if (t.getOwnerId()==playerId) {
+                    numberOfTilesWithSameId++;
+                }
             }
         }
         return numberOfTilesWithSameId;
@@ -171,8 +204,11 @@ public class ISP_Joshua{
         bankAmount+=amount;
     }
     void collectTax(){
-        balance[curPlayer]+=bankAmount;
-        bankAmount=0;
+        if(bankAmount!=0){
+            Util.messageDialog("Free Parking "+nameOfPlayer[curPlayer]+" Collects $"+bankAmount, "Free Parking");
+            balance[curPlayer]+=bankAmount;
+            bankAmount=0;
+        }
     }
     void nextTurn(){
         curPlayer++;
@@ -193,9 +229,150 @@ public class ISP_Joshua{
         inJail[curPlayer]=true;
         turnsInJail[curPlayer]=0;
     }
+    void displayMortgage(){
+        Console mortgage = new Console("Mortgage/Unmortgage");
+        int tilesOwned[] = new int[NUMBEROFTILES+1];
+        int arrPointer=1;
+        for(int i=1; i<=NUMBEROFTILES; i++){
+            if(monopolyTiles[i].getTileType()==3||
+            monopolyTiles[i].getTileType()==2||
+            monopolyTiles[i].getTileType()==10){
+                OwnableTile t = (OwnableTile)monopolyTiles[i];
+                if(t.getOwnerId()==curPlayer){
+                    tilesOwned[arrPointer++]=i;
+                }
+            }
+        }
+        while(true){
+            mortgage.clear();
+            mortgage.println(nameOfPlayer[curPlayer]+" \'s balance: $"+balance[curPlayer]);
+            mortgage.print("Name",40);
+            mortgage.println("Status");
+            mortgage.println("----------------------------------------------------");
+            for(int i=1; i<arrPointer; i++){
+                mortgage.print(i+": "+monopolyTiles[tilesOwned[i]].getInfo(),40);
+                OwnableTile t = (OwnableTile)monopolyTiles[tilesOwned[i]];
+                if(t.isMortgaged())mortgage.println("Mortgaged");
+                else mortgage.println("Not Mortgaged");
+            }
+            int choice;
+            if(arrPointer==1){
+                choice = Util.queryInt("Please choose an option:\n"+
+                                        "0: Close window", "Please choose a valid option","Mortgage/Unmortgage",0,arrPointer-1);
+            }else{
+                choice = Util.queryInt("Please choose an option:\n"+
+                                        "0: Close window\n"+
+                                        "1-"+(arrPointer-1)+": Mortgage/Unmortgage property", "Please choose a valid option","Mortgage/Unmortgage",0,arrPointer-1);
+            }
+            if(choice==0)break;
+            //TODO: Add option to confirm
+            OwnableTile t = (OwnableTile)monopolyTiles[tilesOwned[choice]];
+            if(t.isMortgaged())t.unMortgage(this);
+            else t.mortgage(this);
+        }
+        mortgage.close();
+    }
+    int getMinOfColourSet(int colourId){
+        int retVal=5;
+        for(int i=1; i<=NUMBEROFTILES; i++){
+            if(monopolyTiles[i].getTileType()==2){
+                Property t = (Property)monopolyTiles[i];
+                if(t.propertyColour==colourId){
+                    if(t.getOwnerId()!=curPlayer){
+                        return -1;
+                    }else if(t.isMortgaged()){
+                        return -2;
+                    }else{
+                        retVal=Math.min(retVal,t.tierLevel);
+                    }
+                }
+            }
+        }
+        return retVal;
+    }
+    int getMaxOfColourSet(int colourId){
+        int retVal=0;
+        for(int i=1; i<=NUMBEROFTILES; i++){
+            if(monopolyTiles[i].getTileType()==2){
+                Property t = (Property)monopolyTiles[i];
+                if(t.propertyColour==colourId){
+                    if(t.getOwnerId()!=curPlayer){
+                        return -1;
+                    }else if(t.isMortgaged()){
+                        return -2;
+                    }else{
+                        retVal=Math.max(retVal,t.tierLevel);
+                    }
+                }
+            }
+        }
+        return retVal;
+    }
+    void displayHouses(){
+        Console houses = new Console("Buy/Sell Houses");
+        int propertiesOwned[] = new int[NUMBEROFTILES+1];
+        int arrPointer=1;
+        for(int i=1; i<=NUMBEROFTILES; i++){
+            if(monopolyTiles[i].getTileType()==2){
+                OwnableTile t = (OwnableTile)monopolyTiles[i];
+                if(t.getOwnerId()==curPlayer){
+                    propertiesOwned[arrPointer++]=i;
+                }
+            }
+        }
+        while(true){
+            houses.clear();
+            houses.println(nameOfPlayer[curPlayer]+" \'s balance: $"+balance[curPlayer]);
+            houses.print("Name",30);
+            houses.print("Is mortgaged",15);
+            houses.print("Houses Owned",12);
+            houses.println("Hotels Owned",12);
+            houses.println("----------------------------------------------------");
+            for(int i=1; i<arrPointer; i++){
+                houses.print(i+": "+monopolyTiles[propertiesOwned[i]].getInfo(),30);
+                Property t = (Property)monopolyTiles[propertiesOwned[i]];
+                if(t.isMortgaged())houses.print("Mortgaged",15);
+                else houses.print("Not Mortgaged",15);
+                houses.print(t.getNumOfHouses(),12);
+                houses.println(t.getNumOfHotels(),12);
+            }
+            int choice;
+            if(arrPointer==1){
+                choice = Util.queryInt("Please choose an option:\n"+
+                                        "0: Close window", "Please choose a valid option","Buy/Sell",0,arrPointer-1);
+            }else{
+                choice = Util.queryInt("Please choose an option:\n"+
+                                        "0: Close window\n"+
+                                        "1-"+(arrPointer-1)+": Buy/Sell Houses", "Please choose a valid option","Mortgage/Unmortgage",0,arrPointer-1);
+            }
+            if(choice==0)break;
+            Property p = (Property)monopolyTiles[propertiesOwned[choice]];
+            int buyOrSell = Util.optionDialog(p.getFullInfo(),p.getInfo(), new String[]{"Buy","Sell"});
+            if(buyOrSell==0){   //Buy
+                p.buyHouse(this);
+            }else{  //Sell
+                p.sellHouse(this);
+            }
+        }
+        houses.close();
+    }
+    void executeCurrentTile(){
+        monopolyTiles[getPosOfCurPlayer()].executeTile(this);
+    }
+    void randomizePlayers(){
+        for(int i=0; i<100; i++){
+            int a = (int)((numOfPlayers-1)*Math.random()+1);
+            int b = (int)((numOfPlayers-1)*Math.random()+1);
+            String switchVar=nameOfPlayer[a];
+            nameOfPlayer[a]=nameOfPlayer[b];
+            nameOfPlayer[b]=switchVar;
+        }
+    }
     void display(){
         int concurrentDoubles=0;
         resetBoard();
+        // randomizePlayers();
+        nameOfPlayer[0]="No One";
         nameOfPlayer[1]="Player 1 (CAT)";   //TODO: TEMP LINES
         nameOfPlayer[2]="Player 2 (SHIP)";
         beginTurn:
@@ -229,10 +406,23 @@ public class ISP_Joshua{
                         if(hasGetOutOfJail[curPlayer]){
                             inJail[curPlayer]=false;
                             hasGetOutOfJail[curPlayer]=true;
+                            break;
                         }else{
                             Util.messageDialog("You do not have a get out of jail card!","JAIL");
                         }
                     }
+                }
+            }
+            while(true){
+                int choice = Util.queryInt(nameOfPlayer[curPlayer]+"\'s turn, choose an option\n"+
+                                            "1: Roll dice\n"+
+                                            "2: Mortgage/Unmortgage\n"+
+                                            "3: Buy/Sell Houses", "Please choose a valid option",nameOfPlayer[curPlayer], 1,3);
+                if(choice==1)break;
+                if(choice==2){
+                    displayMortgage();
+                }else{
+                    displayHouses();
                 }
             }
             c.println("--------------------");
@@ -267,7 +457,7 @@ public class ISP_Joshua{
             c.println("  v  ");
             moveForward(diceOne+diceTwo);
             c.println("Now on "+monopolyTiles[getPosOfCurPlayer()].getInfo());
-            monopolyTiles[getPosOfCurPlayer()].executeTile(this);
+            executeCurrentTile();
             c.println();
             c.println("----------------------------------------");
             c.println("BALANCE:");
@@ -291,13 +481,8 @@ public class ISP_Joshua{
         }
     }
     void rollDice(){
-        if(inJail[curPlayer]){
-            diceOne=(int)(6*Math.random()+1);
-            diceTwo=(int)(6*Math.random()+1);
-        }else{
-            diceOne=6;
-            diceTwo=6;
-        }
+        diceOne=(int)(6*Math.random()+1);
+        diceTwo=(int)(6*Math.random()+1);
     }
     void loadAssets(){
         /*

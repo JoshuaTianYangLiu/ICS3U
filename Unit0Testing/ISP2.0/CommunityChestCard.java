@@ -29,6 +29,7 @@ public class CommunityChestCard{    //TODO: Clean up code from removing the Tile
         switch(operation){
             case MOVETO:
                 j.moveTo(value1);
+                j.executeCurrentTile();
                 break;
             case ADD:
                 j.addMoney(value1);
@@ -43,7 +44,14 @@ public class CommunityChestCard{    //TODO: Clean up code from removing the Tile
                 j.sendToJail();
                 break;
             case MAKEHIMLOSE:
-
+                int numOfHouses=j.getNumOfHousesOwned();
+                int numOfHotels=j.getNumOfHotelsOwned();
+                int totalPayment = value1*numOfHouses+value2*numOfHotels;
+                Util.messageDialog("Number of houses owned: "+numOfHouses+"*"+value1+'\n'+
+                                    "Number of hotels owned: "+numOfHotels+"*"+value2+'\n'+
+                                    "---------------------------\n"+
+                                    "Pay $"+totalPayment, "Chance");
+                j.payTax(totalPayment);
                 break;
             case GETPLAYERS:
                 for(int i=1; i<=j.numOfPlayers; i++){

@@ -41,12 +41,16 @@ public class ChanceCard{    //TODO: Clean up code from removing the Tile interfa
                 break;
             case NEARRAIL:
                 j.moveUntil(3);
+                j.executeCurrentTile();
                 break;
             case NEARUTIL:
                 j.moveUntil(10);
+                j.executeCurrentTile();
                 break;
             case MOVETO:
                 j.moveTo(value1);
+                //Execute tile
+                j.executeCurrentTile();
                 break;
             case ADD:
                 j.addMoney(value1);
@@ -57,7 +61,14 @@ public class ChanceCard{    //TODO: Clean up code from removing the Tile interfa
                 break;
             case MAKEHIMLOSE:
                 //Pay __ for each house and __ for each hotel
-
+                int numOfHouses=j.getNumOfHousesOwned();
+                int numOfHotels=j.getNumOfHotelsOwned();
+                int totalPayment = value1*numOfHouses+value2*numOfHotels;
+                Util.messageDialog("Number of houses owned: "+numOfHouses+"*"+value1+'\n'+
+                                    "Number of hotels owned: "+numOfHotels+"*"+value2+'\n'+
+                                    "---------------------------\n"+
+                                    "Pay $"+totalPayment, "Chance");
+                j.payTax(totalPayment);
                 break;
             case GIVEPLAYERS:
                 for(int i=1; i<j.numOfPlayers; i++){
@@ -68,6 +79,7 @@ public class ChanceCard{    //TODO: Clean up code from removing the Tile interfa
                 break;
             case MOVEBACK:
                 j.moveBack(3);
+                j.executeCurrentTile();
                 break;
             case GOTOJAIL:
                 j.sendToJail();

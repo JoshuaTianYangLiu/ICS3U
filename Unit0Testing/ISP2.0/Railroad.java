@@ -4,8 +4,10 @@ public class Railroad implements Tile,OwnableTile{
     int unMortgageValue;
     int ownerId;
     int rentCost[] = new int[5];
+    boolean isMortgaged;
     Railroad(String input)throws Exception{
         //TODO: Add exception handler
+        isMortgaged=false;
         String portions[] = input.split("\\|");     // Added \\ as escape characters 
         if(portions.length!=7){
             throw new Exception("Not enough parameters in railroad line\n Input: "+input);
@@ -21,14 +23,19 @@ public class Railroad implements Tile,OwnableTile{
     public void buyProperty(ISP_Joshua j,int amount,int playerId){
         j.removeMoney(amount);
         ownerId=playerId;
-        j.addToInventory(this);
+        // j.addToInventory(this);
     } 
     void payRent(ISP_Joshua j){
         //TODO: Get number of railroads owned
-        int numberOfRails=j.numberOfTilesOwned(3,ownerId);
-        Util.messageDialog("You landed on "+name+"\n"+
-                            "Pay "+j.nameOfPlayer[ownerId]+" $"+rentCost[numberOfRails]+".","Pay rent on "+name);
-        j.transferMoney(rentCost[numberOfRails],ownerId);
+        if(isMortgaged){
+            Util.messageDialog(name+" is mortgaged\n"+
+                                "Property owned by "+j.nameOfPlayer[ownerId], name);
+        }else{
+            int numberOfRails=j.numberOfTilesOwned(3,ownerId);
+            Util.messageDialog("You landed on "+name+"\n"+
+                                "Pay "+j.nameOfPlayer[ownerId]+" $"+rentCost[numberOfRails]+".","Pay rent on "+name);
+            j.transferMoney(rentCost[numberOfRails],ownerId);
+        }
     }
     public void executeTile(ISP_Joshua j){
         if(ownerId==NOTOWNED){  //If not owned
@@ -61,11 +68,23 @@ public class Railroad implements Tile,OwnableTile{
     public String getInfo(){
         return name;    //Maybe need other info such of money and such.
     }
-    public void mortgage(){
+    public void mortgage(ISP_Joshua j){
+        isMortgaged=true;
+        j.addMoney(cost/2);
         //We'll need to see what to do here
     }
-    public void unMortgage(){
+    public void unMortgage(ISP_Joshua j){
+        if(j.getBalance()>=unMortgageValue){
+            isMortgaged=false;
+            j.removeMoney(unMortgageValue);
+        }else{
+            Util.messageDialog("You do not have enough money,\n"+
+                                "Cannot unmortgage this property.", name);
+        }
         //We'll see what we need to do here
+    }
+    public boolean isMortgaged(){
+        return isMortgaged;
     }
     public void tranferOwnership(int toPlayer){
         ownerId=toPlayer;

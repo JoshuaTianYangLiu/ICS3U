@@ -18,7 +18,9 @@ public class Property implements Tile,OwnableTile{
     int hotelCost;
     int mortgageValue,unMortgageValue;
     int ownerId;
+    boolean isMortgaged;
     Property(String input) throws Exception{
+        isMortgaged=false;
         ownerId=0;
         tierLevel=0;
         String portions[] = input.split("\\|");     // Added \\ as escape characters 
@@ -42,18 +44,83 @@ public class Property implements Tile,OwnableTile{
     public void buyProperty(ISP_Joshua j,int cost,int playerId){    //The property can be bought with different costs due to auctions
         j.removeMoney(cost);
         ownerId=playerId;
-        j.addToInventory(this);
+        // j.addToInventory(this);
     }
     void payRent(ISP_Joshua j){
-        Util.messageDialog("You landed on "+name+"\n"+
-                            "Pay "+j.nameOfPlayer[ownerId]+" $"+tierCost[tierLevel]+".","Pay rent on "+name);
-        j.transferMoney(tierCost[tierLevel],ownerId);
+        if(isMortgaged){
+            Util.messageDialog(name+" is mortgaged\n"+
+                                "Property owned by "+j.nameOfPlayer[ownerId], name);
+        }else{
+            Util.messageDialog("You landed on "+name+"\n"+
+                                "Pay "+j.nameOfPlayer[ownerId]+" $"+tierCost[tierLevel]+".","Pay rent on "+name);
+            j.transferMoney(tierCost[tierLevel],ownerId);
+        }
     }
     void buyHouse(ISP_Joshua j){    //In my words, move up a tier level
-        
+        int retVal=j.getMinOfColourSet(propertyColour);
+        if(retVal==-1){ //Does not own full colour set
+            Util.messageDialog("You do not own all "+getColourName()+"s!", "Buy House");
+            return;
+        }
+        if(retVal==-2){   //One of the properties is mortgaged
+            Util.messageDialog("One of your properties is mortgaged!","Buy House");
+            return;
+        }
+        if(tierLevel!=retVal){
+            Util.messageDialog("Please follow the even build rule.\n"+
+                                "You must first buy houses for properties with "+retVal+" houses.", "Buy House");
+            return;
+        }
+        if(tierLevel==5){
+            Util.messageDialog("You cannot build anymore on this property","Buy House");
+            return;
+        }
+        if(tierLevel<4){    //Buying house
+            if(j.getBalance()<houseCost){
+                Util.messageDialog("Not enough money to buy house!", "Buy House");
+                return;
+            }
+            Util.messageDialog("House bought on "+name+".","Buy House");    //Maybe need additional info
+            j.removeMoney(houseCost);
+            tierLevel++;
+        }else{  //Buying hotel
+            if(j.getBalance()<hotelCost){
+                Util.messageDialog("Not enough money to buy hotel!", "Buy House");
+                return;
+            }
+            Util.messageDialog("Hotel bought on "+name+".","Buy House");    //Maybe need additional info
+            j.removeMoney(hotelCost);
+            tierLevel++;
+        }
     }
     void sellHouse(ISP_Joshua j){   //Move down a tier, this should also work with mortgaging
-        
+        int retVal=j.getMaxOfColourSet(propertyColour);
+        if(retVal==-1||retVal==-2||tierLevel==0){
+            Util.messageDialog("You cannot sell houses if you do not have any houses", "Sell House");
+            return;
+        }
+        if(tierLevel!=retVal){
+            Util.messageDialog("Please follow the even sell rule.\n"+
+                                "You must first sell houses for properties with "+retVal+" houses.", "Sell House");
+            return;
+        }
+        if(tierLevel==5){
+            Util.messageDialog("Hotel Sold on "+name+".","Sell House");
+            j.addMoney(hotelCost/2);
+            tierLevel--;
+        }else{
+            Util.messageDialog("House Sold on "+name+".","Sell House");
+            j.addMoney(houseCost/2);
+            tierLevel--;
+        }
+
+    }
+    int getNumOfHouses(){
+        if(tierLevel==5)return 0;
+        return tierLevel;
+    }
+    int getNumOfHotels(){
+        return tierLevel==5?1:0;
     }
     public void executeTile(ISP_Joshua j){
         //For the property tile, it is difficult to execute the property and known what function it should do.
@@ -90,11 +157,25 @@ public class Property implements Tile,OwnableTile{
     public String getInfo(){
         return name;    //Maybe need other info such of money and such.
     }
-    public void mortgage(){
-
+    public void mortgage(ISP_Joshua j){
+        if(tierLevel==0){
+            isMortgaged=true;
+            j.addMoney(cost/2);
+        }else{
+            Util.messageDialog("You have houses on this property, Sell those first", name);
+        }
     }
-    public void unMortgage(){
-
+    public void unMortgage(ISP_Joshua j){
+        if(j.getBalance()>=unMortgageValue){
+            isMortgaged=false;
+            j.removeMoney(unMortgageValue);
+        }else{
+            Util.messageDialog("You do not have enough money,\n"+
+                                "Cannot unmortgage this property.", name);
+        }
+    }
+    public boolean isMortgaged(){
+        return isMortgaged;
     }
     public void tranferOwnership(int toPlayer){
         ownerId=toPlayer;

@@ -4,7 +4,9 @@ public class Utility implements Tile,OwnableTile{
     int unMortgage;
     int multiplier1,multiplier2;
     int ownerId;
+    boolean isMortgaged;
     Utility(String input){
+        isMortgaged=false;
         String portion[] = input.split("\\|");      // Added \\ as escape characters 
         ownerId=0;
         name = portion[0];
@@ -16,20 +18,25 @@ public class Utility implements Tile,OwnableTile{
     public void buyProperty(ISP_Joshua j,int amount,int playerId){
         j.removeMoney(amount);
         ownerId=playerId;
-        j.addToInventory(this);
+        // j.addToInventory(this);
     }
     void payRent(ISP_Joshua j){
-        int utilitiesOwned=j.numberOfTilesOwned(10,ownerId);
-        int totalCost=j.diceOne+j.diceTwo;
-        Util.messageDialog("You landed on "+name+"\n"+
-                            "Pay "+j.nameOfPlayer[ownerId]+" $("+j.diceOne+" + "+j.diceTwo+")*"+
-                            (utilitiesOwned==1?multiplier1:multiplier2)+"= $"+
-                            ((utilitiesOwned==1?multiplier1:multiplier2)*totalCost)+".","Pay rent on "+name);
-        //TODO: Add some way to display how much they have to pay
-        if(utilitiesOwned==1){
-            j.transferMoney(multiplier1*totalCost,ownerId);
+        if(isMortgaged){
+            Util.messageDialog(name+" is mortgaged\n"+
+                                "Property owned by "+j.nameOfPlayer[ownerId], name);
         }else{
-            j.transferMoney(multiplier2*totalCost,ownerId);
+            int utilitiesOwned=j.numberOfTilesOwned(10,ownerId);
+            int totalCost=j.diceOne+j.diceTwo;
+            Util.messageDialog("You landed on "+name+"\n"+
+                                "Pay "+j.nameOfPlayer[ownerId]+" $("+j.diceOne+" + "+j.diceTwo+")*"+
+                                (utilitiesOwned==1?multiplier1:multiplier2)+"= $"+
+                                ((utilitiesOwned==1?multiplier1:multiplier2)*totalCost)+".","Pay rent on "+name);
+            //TODO: Add some way to display how much they have to pay
+            if(utilitiesOwned==1){
+                j.transferMoney(multiplier1*totalCost,ownerId);
+            }else{
+                j.transferMoney(multiplier2*totalCost,ownerId);
+            }
         }
     }
     public void executeTile(ISP_Joshua j){
@@ -63,11 +70,21 @@ public class Utility implements Tile,OwnableTile{
     public String getInfo(){
         return name;
     }
-    public void mortgage(){
-
+    public void mortgage(ISP_Joshua j){
+        isMortgaged=true;
+        j.addMoney(cost/2);
     }
-    public void unMortgage(){
-        
+    public void unMortgage(ISP_Joshua j){
+        if(j.getBalance()>=unMortgage){
+            isMortgaged=false;
+            j.removeMoney(unMortgage);
+        }else{
+            Util.messageDialog("You do not have enough money,\n"+
+                                "Cannot unmortgage this property.", name);
+        }
+    }
+    public boolean isMortgaged(){
+        return isMortgaged;
     }
     public void tranferOwnership(int toPlayer){
         ownerId=toPlayer;
