@@ -1,33 +1,26 @@
 public class ChanceCard{    //TODO: Clean up code from removing the Tile interface
     String message;
-    CardLabels operation;
+    String operation;
     int value1,value2;
     ChanceCard(String input)throws Exception{
         //We need to parse the string and assign the corresponding info
         //Will be seperated by &
         String portions[] = input.split("\\|");
         message=portions[0];
-        operation=CardLabels.valueOf(portions[1]);
-        switch(operation){
-        case MOVETO:
+        operation=portions[1];
+        if(operation.equals("MOVETO")){
             value1=Integer.parseInt(portions[2]);
-            break;
-        case ADD:
+        }else if(operation.equals("ADD")){
             value1=Integer.parseInt(portions[2]);
-            break;
-        case REMOVE:
+        }else if(operation.equals("REMOVE")){
             value1=Integer.parseInt(portions[2]);
-            break;
-        case MAKEHIMLOSE:
+        }else if(operation.equals("MAKEHIMLOSE")){
             value1=Integer.parseInt(portions[2]);
             value2=Integer.parseInt(portions[3]);
-            break;
-        case GIVEPLAYERS:
+        }else if(operation.equals("GIVEPLAYERS")){
             value1=Integer.parseInt(portions[2]);
-            break;
         }
     }
-    
     public String getInfo() {
         return message;
     }
@@ -35,56 +28,45 @@ public class ChanceCard{    //TODO: Clean up code from removing the Tile interfa
         return 4;
     }
     void executeTile(ISP_Joshua j){
-        switch(operation){
-            case GETOUT:
-                j.addGetOutOfJail();
-                break;
-            case NEARRAIL:
-                j.moveUntil(3);
-                j.executeCurrentTile();
-                break;
-            case NEARUTIL:
-                j.moveUntil(10);
-                j.executeCurrentTile();
-                break;
-            case MOVETO:
-                j.moveTo(value1);
-                //Execute tile
-                j.executeCurrentTile();
-                break;
-            case ADD:
-                j.addMoney(value1);
-                break;
-            case REMOVE:
-                //Remove money, figure out what to do
-                j.payTax(value1);
-                break;
-            case MAKEHIMLOSE:
-                //Pay __ for each house and __ for each hotel
-                int numOfHouses=j.getNumOfHousesOwned();
-                int numOfHotels=j.getNumOfHotelsOwned();
-                int totalPayment = value1*numOfHouses+value2*numOfHotels;
-                Util.messageDialog("Number of houses owned: "+numOfHouses+"*"+value1+'\n'+
-                                    "Number of hotels owned: "+numOfHotels+"*"+value2+'\n'+
-                                    "---------------------------\n"+
-                                    "Pay $"+totalPayment, "Chance");
-                j.payTax(totalPayment);
-                break;
-            case GIVEPLAYERS:
-                for(int i=1; i<j.numOfPlayers; i++){
-                    if(i!=j.curPlayer){
-                        j.transferMoney(value1, i);
-                    }
+        if(operation.equals("GETOUT")){
+            j.addGetOutOfJail();
+        }else if(operation.equals("NEARRAIL")){
+            j.moveUntil(3);
+            j.executeCurrentTile();
+        }else if(operation.equals("NEARUTIL")){
+            j.moveUntil(10);
+            j.executeCurrentTile();
+        }else if(operation.equals("MOVETO")){
+            j.moveTo(value1);
+            //Execute tile
+            j.executeCurrentTile();
+        }else if(operation.equals("ADD")){
+            j.addMoney(value1);
+        }else if(operation.equals("REMOVE")){
+            //Remove money, figure out what to do
+            j.payTax(value1);
+        }else if(operation.equals("MAKEHIMLOSE")){
+            //Pay __ for each house and __ for each hotel
+            int numOfHouses=j.getNumOfHousesOwned();
+            int numOfHotels=j.getNumOfHotelsOwned();
+            int totalPayment = value1*numOfHouses+value2*numOfHotels;
+            Util.messageDialog("Number of houses owned: "+numOfHouses+"*"+value1+'\n'+
+                                "Number of hotels owned: "+numOfHotels+"*"+value2+'\n'+
+                                "---------------------------\n"+
+                                "Pay $"+totalPayment, "Chance");
+            j.payTax(totalPayment);
+        }else if(operation.equals("GIVEPLAYERS")){
+            for(int i=1; i<j.numOfPlayers; i++){
+                if(i!=j.curPlayer){
+                    j.transferMoney(value1, i);
                 }
-                break;
-            case MOVEBACK:
-                j.moveBack(3);
-                j.executeCurrentTile();
-                break;
-            case GOTOJAIL:
-                j.sendToJail();
-                break;
             }
+        }else if(operation.equals("MOVEBACK")){
+            j.moveBack(3);
+            j.executeCurrentTile();
+        }else if(operation.equals("GOTOJAIL")){
+            j.sendToJail();
+        }
     }
 }
 /*

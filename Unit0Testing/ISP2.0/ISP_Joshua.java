@@ -31,6 +31,7 @@ public class ISP_Joshua{
 
     }
     int mainMenu(){
+        Util.messageDialog("This is main menu", "Main Menu");
         return 1;
     }
     void instructions(){
@@ -403,13 +404,15 @@ public class ISP_Joshua{
                 int choice = Util.queryInt(nameOfPlayer[curPlayer]+"\'s turn, choose an option\n"+
                                             "1: Roll dice\n"+
                                             "2: Mortgage/Unmortgage\n"+
-                                            "3: Buy/Sell Houses", "Please choose a valid option",nameOfPlayer[curPlayer], 1,3);
+                                            "3: Buy/Sell Houses\n"+
+                                            "4: Back to Menu", "Please choose a valid option",nameOfPlayer[curPlayer], 1,4);
                 if(choice==1)break;
-                if(choice==2){
+                if(choice==2)
                     displayMortgage();
-                }else{
+                if(choice==3)
                     displayHouses();
-                }
+                if(choice==4)
+                    break beginTurn;
             }
             c.println("--------------------");
             c.println("Press any key to roll");
@@ -442,8 +445,8 @@ public class ISP_Joshua{
             c.println("  |  ");
             c.println("  v  ");
             moveForward(diceOne+diceTwo);
-            c.println("Now on "+monopolyTiles[getPosOfCurPlayer()].getInfo());
             executeCurrentTile();
+            c.println("Now on "+monopolyTiles[getPosOfCurPlayer()].getInfo());
             c.println();
             c.println("----------------------------------------");
             c.println("BALANCE:");
@@ -463,6 +466,37 @@ public class ISP_Joshua{
                 c.clear();
                 concurrentDoubles=0;
                 nextTurn();
+            }
+            removeLosers();
+            if(hasWinner()){
+                c.println("WINNER!");
+                break;
+            }
+        }
+    }
+    boolean hasWinner(){
+        return numOfPlayers==2;
+    }
+    void removeLosers(){
+        for(int i=1; i<numOfPlayers; i++){
+            if(balance[i]<0){
+                numOfPlayers--;
+                for(int j=i; j<numOfPlayers; i++){
+                    hasGetOutOfJail[j]=hasGetOutOfJail[j+1];
+                    inJail[j]=inJail[j+1];
+                    turnsInJail[j]=turnsInJail[j+1];
+                    positionOfPlayers[j]=positionOfPlayers[j+1];
+                    balance[j]=balance[j+1];
+                    nameOfPlayer[j]=nameOfPlayer[j+1];
+                    for(int k=1; k<=NUMBEROFTILES; k++){
+                        if(monopolyTiles[k].getTileType()==3||
+                            monopolyTiles[k].getTileType()==2||
+                            monopolyTiles[k].getTileType()==10){
+                            OwnableTile t = (OwnableTile)monopolyTiles[k];
+                            if(k+1==t.getOwnerId())t.tranferOwnership(k);
+                        }
+                    }
+                }
             }
         }
     }
@@ -487,7 +521,7 @@ public class ISP_Joshua{
         */
         BufferedReader boardTileId=null,properties=null,railroad=null,utility=null,tax=null;
         //Two options UK and US
-        String boardLanguage="UK";
+        String boardLanguage="US";
 
         try{
             boardTileId = new BufferedReader(new FileReader(new File("assets\\BoardTileId.txt")));
@@ -526,66 +560,56 @@ public class ISP_Joshua{
         }
         for(int i=1; i<=NUMBEROFTILES; i++){
             try{
-                switch(boardTileId.readLine()){
-                    case "1":
-                        monopolyTiles[i]=new Go();
-                        break;
-                    case "2":
-                        try{
-                            monopolyTiles[i]=new Property(properties.readLine());
-                        }catch(Exception e){
-                            System.out.println("Something wrong happened on file reading Properties.txt and parsing\n Stack trace: ");
-                            e.printStackTrace();
-                            //TODO: Differentiate the error between readline and parsing
-                            System.exit(1);
-                        }
-                        break;
-                    case "3":
-                        try{
-                            monopolyTiles[i]=new Railroad(railroad.readLine());
-                        }catch(Exception e){
-                            System.out.println("Something wrong happened on file reading Railroad.txt and parsing\n Stack trace: ");
-                            e.printStackTrace();
-                            //TODO: Differentiate the error between readline and parsing
-                            System.exit(1);
-                        }
-                        break;
-                    case "4":
-                        monopolyTiles[i]=new ChanceTile();
-                        break;
-                    case "5":
-                        monopolyTiles[i]=new CommunityChestTile();
-                        break;
-                    case "6":
-                        try{
-                            monopolyTiles[i]=new Tax(tax.readLine());
-                        }catch(Exception e){
-                            System.out.println("Something wrong happened on file reading Tax.txt and parsing\n Stack trace: ");
-                            e.printStackTrace();
-                            //TODO: Differentiate the error between readline and parsing
-                            System.exit(1);
-                        }
-                        break;
-                    case "7":
-                        monopolyTiles[i]=new FreeParking();
-                        break;
-                    case "8":
-                        monopolyTiles[i]=new GoToJail();
-                        break;
-                    case "9":
-                        monopolyTiles[i]=new JailZone();
-                        break;
-                    case "10":
-                        try{
-                            monopolyTiles[i]=new Utility(utility.readLine());
-                        }catch(Exception e){
-                            System.out.println("Something wrong happened on file reading Railroad.txt and parsing\n Stack trace: ");
-                            e.printStackTrace();
-                            //TODO: Differentiate the error between readline and parsing
-                            System.exit(1);
-                        }
-                        break;
-                    default:
+                String boardTileInputId=boardTileId.readLine();
+                if(boardTileInputId.equals("1")){
+                    monopolyTiles[i]=new Go();
+                }else if(boardTileInputId.equals("2")){
+                    try{
+                        monopolyTiles[i]=new Property(properties.readLine());
+                    }catch(Exception e){
+                        System.out.println("Something wrong happened on file reading Properties.txt and parsing\n Stack trace: ");
+                        e.printStackTrace();
+                        //TODO: Differentiate the error between readline and parsing
+                        System.exit(1);
+                    }
+                }else if(boardTileInputId.equals("3")){
+                    try{
+                        monopolyTiles[i]=new Railroad(railroad.readLine());
+                    }catch(Exception e){
+                        System.out.println("Something wrong happened on file reading Railroad.txt and parsing\n Stack trace: ");
+                        e.printStackTrace();
+                        //TODO: Differentiate the error between readline and parsing
+                        System.exit(1);
+                    }
+                }else if(boardTileInputId.equals("4")){
+                    monopolyTiles[i]=new ChanceTile();
+                }else if(boardTileInputId.equals("5")){
+                    monopolyTiles[i]=new CommunityChestTile();
+                }else if(boardTileInputId.equals("6")){
+                    try{
+                        monopolyTiles[i]=new Tax(tax.readLine());
+                    }catch(Exception e){
+                        System.out.println("Something wrong happened on file reading Tax.txt and parsing\n Stack trace: ");
+                        e.printStackTrace();
+                        //TODO: Differentiate the error between readline and parsing
+                        System.exit(1);
+                    }
+                }else if(boardTileInputId.equals("7")){
+                    monopolyTiles[i]=new FreeParking();
+                }else if(boardTileInputId.equals("8")){
+                    monopolyTiles[i]=new GoToJail();
+                }else if(boardTileInputId.equals("9")){
+                    monopolyTiles[i]=new JailZone();
+                }else if(boardTileInputId.equals("10")){
+                    try{
+                        monopolyTiles[i]=new Utility(utility.readLine());
+                    }catch(Exception e){
+                        System.out.println("Something wrong happened on file reading Railroad.txt and parsing\n Stack trace: ");
+                        e.printStackTrace();
+                        //TODO: Differentiate the error between readline and parsing
+                        System.exit(1);
+                    }
+                }else{
                         System.out.println("Unknown id in BoardTileId.txt");
                         System.exit(1);
                 }

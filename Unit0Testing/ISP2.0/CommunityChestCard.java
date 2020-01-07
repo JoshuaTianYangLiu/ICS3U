@@ -1,65 +1,51 @@
 public class CommunityChestCard{    //TODO: Clean up code from removing the Tile interface
     String message;
-    CardLabels operation;
+    String operation;
     int value1,value2;
     CommunityChestCard(String input){
         String portions[] = input.split("\\|");
         message=portions[0];
-        operation=CardLabels.valueOf(portions[1]);
-        switch(operation){
-            case MOVETO:
-                value1=Integer.parseInt(portions[2]);  
-                break;
-            case ADD:
-                value1=Integer.parseInt(portions[2]);  
-                break;
-            case REMOVE:
-                value1=Integer.parseInt(portions[2]);  
-                break;
-            case MAKEHIMLOSE:
-                value1=Integer.parseInt(portions[2]);  
-                value2=Integer.parseInt(portions[3]);  
-                break;
-            case GETPLAYERS:
-                value1=Integer.parseInt(portions[2]);  
-                break;
+        operation=portions[1];
+        if(operation.equals("MOVETO")){
+            value1=Integer.parseInt(portions[2]);  
+        }else if(operation.equals("ADD")){
+            value1=Integer.parseInt(portions[2]);  
+        }else if(operation.equals("REMOVE")){
+            value1=Integer.parseInt(portions[2]);  
+        }else if(operation.equals("MAKEHIMLOSE")){
+            value1=Integer.parseInt(portions[2]);  
+            value2=Integer.parseInt(portions[3]);  
+        }else if(operation.equals("GETPLAYERS")){
+            value1=Integer.parseInt(portions[2]);  
         }
     }
     public void executeTile(ISP_Joshua j){
-        switch(operation){
-            case MOVETO:
-                j.moveTo(value1);
-                j.executeCurrentTile();
-                break;
-            case ADD:
-                j.addMoney(value1);
-                break;
-            case REMOVE:
-                j.payTax(value1);
-                break;
-            case GETOUT:
-                j.addGetOutOfJail();
-                break;
-            case GOTOJAIL:
-                j.sendToJail();
-                break;
-            case MAKEHIMLOSE:
-                int numOfHouses=j.getNumOfHousesOwned();
-                int numOfHotels=j.getNumOfHotelsOwned();
-                int totalPayment = value1*numOfHouses+value2*numOfHotels;
-                Util.messageDialog("Number of houses owned: "+numOfHouses+"*"+value1+'\n'+
-                                    "Number of hotels owned: "+numOfHotels+"*"+value2+'\n'+
-                                    "---------------------------\n"+
-                                    "Pay $"+totalPayment, "Chance");
-                j.payTax(totalPayment);
-                break;
-            case GETPLAYERS:
-                for(int i=1; i<=j.numOfPlayers; i++){
-                    if(i!=j.curPlayer){
-                        j.transferMoney(value1, i,j.curPlayer);
-                    }
+        if(operation.equals("MOVETO")){
+            j.moveTo(value1);
+            j.executeCurrentTile();
+        }else if(operation.equals("ADD")){
+            j.addMoney(value1);
+        }else if(operation.equals("REMOVE")){
+            j.payTax(value1);
+        }else if(operation.equals("GETOUT")){
+            j.addGetOutOfJail();
+        }else if(operation.equals("GOTOJAIL")){
+            j.sendToJail();
+        }else if(operation.equals("MAKEHIMLOSE")){
+            int numOfHouses=j.getNumOfHousesOwned();
+            int numOfHotels=j.getNumOfHotelsOwned();
+            int totalPayment = value1*numOfHouses+value2*numOfHotels;
+            Util.messageDialog("Number of houses owned: "+numOfHouses+"*"+value1+'\n'+
+                                "Number of hotels owned: "+numOfHotels+"*"+value2+'\n'+
+                                "---------------------------\n"+
+                                "Pay $"+totalPayment, "Chance");
+            j.payTax(totalPayment);
+        }else if(operation.equals("GETPLAYERS")){
+            for(int i=1; i<=j.numOfPlayers; i++){
+                if(i!=j.curPlayer){
+                    j.transferMoney(value1, i,j.curPlayer);
                 }
-                break;
+            }
         }
     }
     public int getTileType(){
