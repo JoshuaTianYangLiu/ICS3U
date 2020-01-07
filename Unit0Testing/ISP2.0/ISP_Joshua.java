@@ -4,6 +4,7 @@ import java.util.*;
 
 public class ISP_Joshua{
     Console c;
+    DrawGame gui;
     //Player id will start from 1
     //Tiles with start from 1
     final int NUMBEROFTILES=40;
@@ -358,12 +359,15 @@ public class ISP_Joshua{
     void display(){
         int concurrentDoubles=0;
         resetBoard();
+        gui=new DrawGame();
+        gui.drawBoard();
         // randomizePlayers();
         nameOfPlayer[0]="No One";
         nameOfPlayer[1]="Player 1 (CAT)";   //TODO: TEMP LINES
         nameOfPlayer[2]="Player 2 (SHIP)";
         beginTurn:
         while(true){
+            gui.displayPlayers(this);
             c.println(nameOfPlayer[curPlayer]);
             if(inJail[curPlayer]){
                 while(true){

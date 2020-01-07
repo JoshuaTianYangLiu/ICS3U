@@ -19,8 +19,13 @@ public class DrawGame{
         }
     }
     void drawBoard(){
-        System.out.println(boardGame.getHeight()+" "+boardGame.getWidth());
-        // boardGame.drawImage(boardImage, 0, 0,null);
+        boardGame.drawImage(boardImage, 0, 0,null);
+    }
+    //Player section: at x=760
+    void displayPlayers(ISP_Joshua j){
+        for(int i=1; i<j.numOfPlayers; i++){
+            boardGame.drawString(j.nameOfPlayer[i], 760, 200*(i-1)+50);
+        }
     }
     public static void main(String[] args){
         DrawGame d = new DrawGame();
