@@ -14,6 +14,11 @@ Remove arraylist from player inventory. Will just search through every tile inst
 Implement player lose method                                    DONE NEEDS TESTING
 Make sure to add checks in the places needed to see if player loses DONE
 
+GUI
+Board
+Mortgage/unmortgage
+Buy/Sell
+players
 
 
 I should do,
