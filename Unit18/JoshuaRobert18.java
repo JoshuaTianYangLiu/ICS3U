@@ -38,6 +38,7 @@ public class JoshuaRobert18{
 	c.println("Anything else: Quit");
     }
     public void askData(){
+        
 	menuChoice=JOptionPane.showInputDialog(null,"Please choose an option","Main Menu",JOptionPane.DEFAULT_OPTION);
 	c.clear();
     }
@@ -196,7 +197,13 @@ public class JoshuaRobert18{
 	    return;
 	}
 	c.println("Please enter file name.");
-	fileName=c.readLine();
+    fileName=c.readLine();
+    if(fileName.length()<4){
+        c.println("Too short of a file name.");
+        pressAnyKey();
+        openFile();
+        return;
+    }
 	if(!fileName.substring(fileName.length()-4).equals(".ics")){
 	    c.println("Invalid extention.");
 	    pressAnyKey();

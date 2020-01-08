@@ -23,7 +23,8 @@ public class Util{
         while(true){
             try{
                 retValue=JOptionPane.showOptionDialog(null, message, title, JOptionPane.DEFAULT_OPTION,JOptionPane.PLAIN_MESSAGE, null,choices,choices[0]);
-                break;
+                if(retValue!=JOptionPane.CLOSED_OPTION)break;
+                messageDialog("Please choose an option.", title);
             }catch(Exception e){}
         }
         return retValue;

@@ -7,5 +7,6 @@ interface OwnableTile{
     public String getFullInfo();
     public void buyProperty(ISP_Joshua j,int amount,int playerId);
     public boolean isMortgaged();
+    public void reset();
     //Is this needed? I dont think so
 }

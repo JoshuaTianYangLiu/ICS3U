@@ -20,8 +20,12 @@ public class Railroad implements Tile,OwnableTile{
             rentCost[i]=Integer.parseInt(portions[i+2]);
         }
     }
+    public void reset(){
+        isMortgaged=false;
+        ownerId=0;
+    }
     public void buyProperty(ISP_Joshua j,int amount,int playerId){
-        j.removeMoney(amount);
+        j.removeMoney(amount,playerId);
         ownerId=playerId;
     } 
     void payRent(ISP_Joshua j){

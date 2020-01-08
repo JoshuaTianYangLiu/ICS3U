@@ -40,9 +40,13 @@ public class Property implements Tile,OwnableTile{
         //Monopoly rules says that mortgage value is half the cost of the property cost
         //selling anything is half the cost right?????
     }
-
+    public void reset(){
+        isMortgaged=false;
+        ownerId=0;
+        tierLevel=0;
+    }
     public void buyProperty(ISP_Joshua j,int cost,int playerId){    //The property can be bought with different costs due to auctions
-        j.removeMoney(cost);
+        j.removeMoney(cost,playerId);
         ownerId=playerId;
     }
     void payRent(ISP_Joshua j){

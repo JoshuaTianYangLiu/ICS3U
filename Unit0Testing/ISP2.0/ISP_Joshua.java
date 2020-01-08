@@ -1,15 +1,17 @@
 import hsa.Console;
 import java.io.*;
 import java.util.*;
+import java.awt.*;
+import java.awt.image.*;
+import javax.imageio.*;
 
 public class ISP_Joshua{
-    Console c;
     DrawGame gui;
     //Player id will start from 1
     //Tiles with start from 1
     final int NUMBEROFTILES=40;
     int numOfPlayers=(2)+1;
-    int initialBalance=1500;
+    int initialBalance=100;
     int bankAmount=0;
     boolean hasGetOutOfJail[]=new boolean[numOfPlayers];
     boolean inJail[] = new boolean[numOfPlayers];
@@ -21,18 +23,18 @@ public class ISP_Joshua{
     int diceOne,diceTwo;
     ChanceCard chancePile[];
     CommunityChestCard communityChestPile[];
+    BufferedImage monopolyPieces[][] = new BufferedImage[numOfPlayers][4];
     // int propertyToPlayer[] = new int[numOfPlayers];
     // int propertyToHotel[] = new int[numOfPlayers];   //Player can own a max of 1 hotel
     // int propertyToHouse[] = new int[numOfPlayers];  //Player can own a max of __ hotel
     int curPlayer;
     ISP_Joshua(){
-        c=new Console("Monopoly");
     }
     void splashScreen(){
 
     }
     int mainMenu(){
-        Util.messageDialog("This is main menu", "Main Menu");
+        // Util.messageDialog("This is main menu", "Main Menu");
         return 1;
     }
     void instructions(){
@@ -61,18 +63,25 @@ public class ISP_Joshua{
     }
     void addGetOutOfJail(){
         hasGetOutOfJail[curPlayer]=true;
+        gui.drawGetOutOfJail(curPlayer);
+    }
+    void useGetOutOfJailCard(){
+        inJail[curPlayer]=false;
+        hasGetOutOfJail[curPlayer]=true;
+        gui.hideGetOutOfJail(curPlayer);
     }
     void moveBack(int spaces){
+        int origPos=positionOfPlayers[curPlayer];
         positionOfPlayers[curPlayer]-=spaces;
+        gui.moveBack(origPos,positionOfPlayers[curPlayer], this);
         //As this is only activated by chance tiles this will have loop over from the start
     }
     void moveUntil(int id){
         int position = getPosOfCurPlayer();
-        while(monopolyTiles[getPosOfCurPlayer()].getTileType()!=id){
+        while(monopolyTiles[position].getTileType()!=id){
             position++;
             if(position>NUMBEROFTILES){
                 position=1;
-                break;
             }
         }
         moveTo(position);
@@ -85,24 +94,40 @@ public class ISP_Joshua{
         moveForward(moveBy);
     }
     void moveForward(int n){
+        int originalPos = positionOfPlayers[curPlayer];
         positionOfPlayers[curPlayer]+=n;
         if(positionOfPlayers[curPlayer]>NUMBEROFTILES){    //That mean they passed go
-            balance[curPlayer]+=200;    //TODO: Change this to method
             positionOfPlayers[curPlayer]-=NUMBEROFTILES;
+            gui.moveFromTo(originalPos, positionOfPlayers[curPlayer],this);
+            addMoney(200);
+        }else{
+            gui.moveFromTo(originalPos, positionOfPlayers[curPlayer],this);
         }
+        
     }
     void transferMoney(int amount,int player1,int player2){
         balance[player1]-=amount;
         balance[player2]+=amount;
+        gui.modifyTwoBalance(amount, player1, player2, this);
     }
     void transferMoney(int amount,int player){  //Transfer money from curplayer to player
         transferMoney(amount,curPlayer,player);
     }
+    void addMoney(int amount,int playerId){  //This will have an animation added
+        balance[playerId]+=amount;
+        gui.modifyBalance(amount,playerId, this);
+    }
+    void removeMoney(int amount,int playerId){  //This will have an animation added
+        balance[playerId]-=amount;
+        gui.modifyBalance(-amount,playerId, this);
+    }
     void addMoney(int amount){  //This will have an animation added
         balance[curPlayer]+=amount;
+        gui.modifyBalance(amount, this);
     }
     void removeMoney(int amount){  //This will have an animation added
         balance[curPlayer]-=amount;
+        gui.modifyBalance(-amount, this);
     }
     void runAuction(OwnableTile land){ //TODO: Run auction for property
         String info = land.getFullInfo();
@@ -136,7 +161,13 @@ public class ISP_Joshua{
             currentBidder++;
             if(currentBidder==numOfPlayers) currentBidder-=numOfPlayers-1;
         }
-        land.buyProperty(this,currentBid,currentBidder);
+        for(int i=1; i<numOfPlayers; i++){
+            if(canBid[i]){
+                winningBidId=i;
+                break;
+            }
+        }
+        land.buyProperty(this,currentBid,winningBidId);
     }
     void pickChanceCard(){
         int randCard = (int)(chancePile.length*Math.random());
@@ -190,6 +221,7 @@ public class ISP_Joshua{
     void payTax(int amount){
         balance[curPlayer]-=amount;
         bankAmount+=amount;
+        gui.modifyBalance(-amount, this);
     }
     void collectTax(){
         if(bankAmount!=0){
@@ -216,6 +248,7 @@ public class ISP_Joshua{
         positionOfPlayers[curPlayer]=posOfJailZone;
         inJail[curPlayer]=true;
         turnsInJail[curPlayer]=0;
+        gui.moveToJail(posOfJailZone, this);
     }
     void displayMortgage(){
         Console mortgage = new Console("Mortgage/Unmortgage");
@@ -344,6 +377,9 @@ public class ISP_Joshua{
         }
         houses.close();
     }
+    BufferedImage getMonopolyPiece(int playerId,int orientation){
+        return monopolyPieces[playerId][orientation];
+    }
     void executeCurrentTile(){
         monopolyTiles[getPosOfCurPlayer()].executeTile(this);
     }
@@ -354,21 +390,59 @@ public class ISP_Joshua{
             String switchVar=nameOfPlayer[a];
             nameOfPlayer[a]=nameOfPlayer[b];
             nameOfPlayer[b]=switchVar;
+            for(int j=0; j<4; j++){
+                BufferedImage biSwitchVar = monopolyPieces[a][j];
+                monopolyPieces[a][j]=monopolyPieces[b][j];
+                monopolyPieces[b][j]=biSwitchVar;
+            }
         }
+    }
+    void choosePieces(){
+        String pieceNames[] = new String[]{"Boot","Boat","Car","Thimble","TopHat"};
+        boolean pieceChosen[] = new boolean[pieceNames.length];
+        for(int i=1; i<numOfPlayers; i++){
+            while(true){
+                int choice=Util.optionDialog(nameOfPlayer[i]+", please choose a monopoly piece.", "Monopoly Pieces",pieceNames);
+                if(pieceChosen[choice]){
+                    Util.messageDialog("The "+pieceNames[choice]+" is already chosen.\nPlease choose another","Monopoly Pieces");
+                }else{
+                    Util.messageDialog(pieceNames[choice]+" chosen for "+nameOfPlayer[i],"Monopoly Pieces");
+                    pieceChosen[choice]=true;
+                    try{
+                        monopolyPieces[i][0]=ImageIO.read(new File("assets\\Images\\"+pieceNames[choice]+"0.png"));
+                        monopolyPieces[i][1]=ImageIO.read(new File("assets\\Images\\"+pieceNames[choice]+"90.png"));
+                        monopolyPieces[i][2]=ImageIO.read(new File("assets\\Images\\"+pieceNames[choice]+"180.png"));
+                        monopolyPieces[i][3]=ImageIO.read(new File("assets\\Images\\"+pieceNames[choice]+"270.png"));
+                    }catch(Exception e){
+                        System.out.println("One of image "+pieceNames[choice]+".png does not exist.");
+                        e.printStackTrace();
+                        System.exit(1);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    String getInfoStepsAhead(int step){
+        int pos = getPosOfCurPlayer()+step;
+        if(pos>NUMBEROFTILES)pos-=NUMBEROFTILES;
+        return monopolyTiles[pos].getInfo();
     }
     void display(){
         int concurrentDoubles=0;
+        //Choose number of players Max is 4
         resetBoard();
-        gui=new DrawGame();
-        gui.drawBoard();
-        // randomizePlayers();
+        //Choose names
         nameOfPlayer[0]="No One";
         nameOfPlayer[1]="Player 1 (CAT)";   //TODO: TEMP LINES
         nameOfPlayer[2]="Player 2 (SHIP)";
+        //Choose pieces
+        choosePieces();
+        // randomizePlayers();
+        gui=new DrawGame(this);
         beginTurn:
         while(true){
-            gui.displayPlayers(this);
-            c.println(nameOfPlayer[curPlayer]);
+            gui.drawPlayerList(this);
             if(inJail[curPlayer]){
                 while(true){
                     int choice=Util.queryInt("You are in Jail. Choose an option\n"+
@@ -390,13 +464,11 @@ public class ISP_Joshua{
                                 inJail[curPlayer]=false;
                             }
                             nextTurn();
-                            c.clear();
                             continue beginTurn;
                         }
                     }else{
                         if(hasGetOutOfJail[curPlayer]){
-                            inJail[curPlayer]=false;
-                            hasGetOutOfJail[curPlayer]=true;
+                            useGetOutOfJailCard();
                             break;
                         }else{
                             Util.messageDialog("You do not have a get out of jail card!","JAIL");
@@ -418,63 +490,43 @@ public class ISP_Joshua{
                 if(choice==4)
                     break beginTurn;
             }
-            c.println("--------------------");
-            c.println("Press any key to roll");
             rollDice();
-            c.getChar();
-            c.println();
-            c.println("--------------------------");
-            c.println("| You rolled a "+diceOne+" and a "+diceTwo+" |");
-            c.println("--------------------------");
-            c.println();
+            Util.messageDialog("--------------------------\n"+
+                                "| You rolled a "+diceOne+" and a "+diceTwo+" |\n"+
+                                "--------------------------\n","MONOPOLY");
             if(diceOne==diceTwo){
                 concurrentDoubles++;
                 if(concurrentDoubles==3){   //Roll three doubles rule
-                    c.println("----------------------------------------------");
-                    c.println("| You rolled 3 doubles in a row, GO TO JAIL! |");
-                    c.println("----------------------------------------------");
+
+                    Util.messageDialog("----------------------------------------------\n"+
+                                        "| You rolled 3 doubles in a row, GO TO JAIL! |\n"+
+                                        "----------------------------------------------\n","MONOPOLY");
                     sendToJail();
                     nextTurn();
                     Util.messageDialog("Press any key to continue", "MONOPOLY");
                     concurrentDoubles=0;
-                    c.clear();
                     continue;
                 }
-                c.println("------------");
-                c.println("| Doubles! |");
-                c.println("------------");
             }
-            c.println("Was on "+monopolyTiles[getPosOfCurPlayer()].getInfo());
-            c.println("-----");
-            c.println("  |  ");
-            c.println("  v  ");
+            Util.messageDialog("Move to "+getInfoStepsAhead(diceOne+diceTwo)+"\n","MONOPOLY");
             moveForward(diceOne+diceTwo);
             executeCurrentTile();
-            c.println("Now on "+monopolyTiles[getPosOfCurPlayer()].getInfo());
-            c.println();
-            c.println("----------------------------------------");
-            c.println("BALANCE:");
-            for(int i=1; i<numOfPlayers; i++){
-                c.print(nameOfPlayer[i]+":",20);
-                c.println(balance[i]+"",10);
-            }
-            Util.messageDialog("Press any key to continue", "MONOPOLY");
-            if(diceOne==diceTwo){
-                c.clear();
-                c.println("--------------");
-                c.println("| Roll again |");
-                c.println("--------------");
-                c.println();
-            }else{
-                c.println("Next turn");
-                c.clear();
-                concurrentDoubles=0;
-                nextTurn();
-            }
+            gui.drawPlayerList(this);
             removeLosers();
             if(hasWinner()){
-                c.println("WINNER!");
+                Util.messageDialog("WINNER!\n"+nameOfPlayer[1],"MONOPOLY");
                 break;
+                //Make sure to clear screen and stuff
+            }
+            Util.messageDialog("Press any enter to continue", "MONOPOLY");
+            if(diceOne==diceTwo){
+                Util.messageDialog("--------------\n"+
+                                    "| Roll again |\n"+
+                                    "--------------\n","MONOPOLY");
+            }else{
+                concurrentDoubles=0;
+                nextTurn();
+                Util.messageDialog("Next turn: "+nameOfPlayer[curPlayer],"MONOPOLY");
             }
         }
     }
@@ -484,8 +536,17 @@ public class ISP_Joshua{
     void removeLosers(){
         for(int i=1; i<numOfPlayers; i++){
             if(balance[i]<0){
+                Util.messageDialog(nameOfPlayer[i]+", YOU LOSE!","MONOPOLY");
                 numOfPlayers--;
-                for(int j=i; j<numOfPlayers; i++){
+                for(int k=1; k<=NUMBEROFTILES; k++){
+                    if(monopolyTiles[k].getTileType()==3||
+                        monopolyTiles[k].getTileType()==2||
+                        monopolyTiles[k].getTileType()==10){
+                        OwnableTile t = (OwnableTile)monopolyTiles[k];
+                        if(i==t.getOwnerId())t.reset();;
+                    }
+                }
+                for(int j=i; j<numOfPlayers; j++){
                     hasGetOutOfJail[j]=hasGetOutOfJail[j+1];
                     inJail[j]=inJail[j+1];
                     turnsInJail[j]=turnsInJail[j+1];
@@ -497,7 +558,7 @@ public class ISP_Joshua{
                             monopolyTiles[k].getTileType()==2||
                             monopolyTiles[k].getTileType()==10){
                             OwnableTile t = (OwnableTile)monopolyTiles[k];
-                            if(k+1==t.getOwnerId())t.tranferOwnership(k);
+                            if(j+1==t.getOwnerId())t.tranferOwnership(j);
                         }
                     }
                 }
@@ -505,8 +566,10 @@ public class ISP_Joshua{
         }
     }
     void rollDice(){
-        diceOne=(int)(6*Math.random()+1);
-        diceTwo=(int)(6*Math.random()+1);
+        diceOne=3;
+        diceTwo=1;
+        // diceOne=(int)(6*Math.random()+1);
+        // diceTwo=(int)(6*Math.random()+1);
     }
     void loadAssets(){
         /*

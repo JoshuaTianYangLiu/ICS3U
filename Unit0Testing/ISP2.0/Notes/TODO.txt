@@ -13,12 +13,17 @@ Reimplement Chance/Community Chest to work without queue        DONE NEEDS TESTI
 Remove arraylist from player inventory. Will just search through every tile instead     DONE
 Implement player lose method                                    DONE NEEDS TESTING
 Make sure to add checks in the places needed to see if player loses DONE
+replace '-' to '\n' in community chest,tax,and chance
+Do some updating on Tax.java
 
 GUI
-Board
+Board                                                           DONE
 Mortgage/unmortgage
+Animation to add/deduct money from people's balance             DONE
 Buy/Sell
-players
+players                                                         DONE
+Houses/Hotels   Should I add this?
+
 
 
 I should do,
