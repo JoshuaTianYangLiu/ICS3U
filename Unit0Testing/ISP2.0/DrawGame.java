@@ -14,15 +14,15 @@ public class DrawGame{
     Color gainMoney= new Color(33,108,42);
     Color loseMoney=new Color(207,20,43);
     DrawGame(ISP_Joshua j){
-        boardGame=new Console(38,111,"Monopoly");
+        boardGame=new Console(38,125,"Monopoly");
         try{
-            boardImage=ImageIO.read(new File("assets\\Images\\MonopolyBoard.jpg"));
+            boardImage=ImageIO.read(new File("assets\\Images\\MonopolyBoard1.jpg"));
             //999x760
             getOutOfJailImg=ImageIO.read(new File("assets\\Images\\GetOutOfJail.png"));
         }catch(Exception e){
             System.out.println("Missing MonopolyBoard.jpg or GetOutOfJail.png");
             e.printStackTrace();
-            System.exit(1);
+            // System.exit(1);
         }
         drawBoard();
         for(int i=1; i<j.numOfPlayers; i++){
@@ -211,7 +211,7 @@ public class DrawGame{
     }
     void drawPlayerList(ISP_Joshua j){
         boardGame.setColor(playerListBG);
-        boardGame.fillRect(760,0,239,760);
+        boardGame.fillRect(760,0,500,1000);
         boardGame.setColor(defaultBG);
         for(int i=1; i<j.numOfPlayers; i++){
             BufferedImage icon = resize(j.monopolyPieces[i][0],3,3);

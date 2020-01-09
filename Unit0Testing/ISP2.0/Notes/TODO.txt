@@ -21,11 +21,12 @@ Pay bail to Jail                                                DONE
 
 GUI,
 Board                                                           DONE
-Mortgage/unmortgage
+Mortgage/unmortgage                                             DONE
 Animation to add/deduct money from people's balance             DONE
 Buy/Sell
 players                                                         DONE
 Draw image when the player pays for property                    DONE
+Resize windows to work on rtp                                   DONE huh, somehow works on vscode and rtp
 
 
 I should do,

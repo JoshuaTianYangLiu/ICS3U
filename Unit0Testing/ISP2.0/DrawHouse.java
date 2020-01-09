@@ -10,7 +10,7 @@ public class DrawHouse{
     Font textTitle=new Font("Cambria",Font.PLAIN,26);
     Font textInfo = new Font ("Times New Roman", Font.PLAIN, 20);
     DrawHouse(){
-        c=new Console(30,80,"Mortgage/Unmortgage");
+        c=new Console(30,90,"");
         //Load assets
     }
     //720x500
