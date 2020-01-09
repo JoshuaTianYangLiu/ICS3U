@@ -25,8 +25,8 @@ public class Railroad implements Tile,OwnableTile{
         ownerId=0;
     }
     public void buyProperty(ISP_Joshua j,int amount,int playerId){
-        j.removeMoney(amount,playerId);
         ownerId=playerId;
+        j.removeMoney(amount,playerId);
     } 
     void payRent(ISP_Joshua j){
         //TODO: Get number of railroads owned

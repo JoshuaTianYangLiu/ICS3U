@@ -46,16 +46,24 @@ public class Property implements Tile,OwnableTile{
         tierLevel=0;
     }
     public void buyProperty(ISP_Joshua j,int cost,int playerId){    //The property can be bought with different costs due to auctions
-        j.removeMoney(cost,playerId);
         ownerId=playerId;
+        j.removeMoney(cost,playerId);
     }
     void payRent(ISP_Joshua j){
         if(isMortgaged){
             Util.messageDialog(name+" is mortgaged\n"+
                                 "Property owned by "+j.nameOfPlayer[ownerId], name);
         }else{
-            Util.messageDialog("You landed on "+name+"\n"+
-                                "Pay "+j.nameOfPlayer[ownerId]+" $"+tierCost[tierLevel]+".","Pay rent on "+name);
+            if(tierLevel==0){
+                Util.messageDialog("You landed on "+name+"\n"+
+                                    "Pay "+j.nameOfPlayer[ownerId]+" $"+tierCost[tierLevel]+".","Pay rent on "+name);
+            }else if(tierLevel<5){
+                Util.messageDialog("You landed on "+name+" with "+tierLevel+" houses\n"+
+                                    "Pay "+j.nameOfPlayer[ownerId]+" $"+tierCost[tierLevel]+".","Pay rent on "+name);
+            }else{
+                Util.messageDialog("You landed on "+name+" with 1 hotel\n"+
+                                    "Pay "+j.nameOfPlayer[ownerId]+" $"+tierCost[tierLevel]+".","Pay rent on "+name);
+            }
             j.transferMoney(tierCost[tierLevel],ownerId);
         }
     }

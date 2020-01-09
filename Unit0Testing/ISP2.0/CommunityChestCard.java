@@ -5,6 +5,7 @@ public class CommunityChestCard{    //TODO: Clean up code from removing the Tile
     CommunityChestCard(String input){
         String portions[] = input.split("\\|");
         message=portions[0];
+        message=message.replace('-', '\n');
         operation=portions[1];
         if(operation.equals("MOVETO")){
             value1=Integer.parseInt(portions[2]);  
@@ -41,7 +42,7 @@ public class CommunityChestCard{    //TODO: Clean up code from removing the Tile
                                 "Pay $"+totalPayment, "Chance");
             j.payTax(totalPayment);
         }else if(operation.equals("GETPLAYERS")){
-            for(int i=1; i<=j.numOfPlayers; i++){
+            for(int i=1; i<j.numOfPlayers; i++){
                 if(i!=j.curPlayer){
                     j.transferMoney(value1, i,j.curPlayer);
                 }

@@ -7,6 +7,7 @@ public class ChanceCard{    //TODO: Clean up code from removing the Tile interfa
         //Will be seperated by &
         String portions[] = input.split("\\|");
         message=portions[0];
+        message=message.replace('-', '\n');
         operation=portions[1];
         if(operation.equals("MOVETO")){
             value1=Integer.parseInt(portions[2]);

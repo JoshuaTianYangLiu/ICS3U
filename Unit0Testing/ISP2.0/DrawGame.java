@@ -79,7 +79,7 @@ public class DrawGame{
         if(playerId==3||playerId==4){
             yOffset=30;
         }
-        boardGame.drawImage(j.getMonopolyPiece(playerId,0),670-(int)(560*(n-1)/9.0)+xOffset,685+yOffset,null);
+        boardGame.drawImage(j.getMonopolyPiece(playerId,0),670-(int)(560*(n-1)/9.0)+xOffset,685+yOffset,null);   
     }
     void drawPiece(int n,int playerId,ISP_Joshua j){
         if(n<11)drawBottom(n, playerId, j);
@@ -87,7 +87,43 @@ public class DrawGame{
         else if(n<31)drawTop(n, playerId, j);
         else if(n<41)drawRight(n, playerId, j);
     }
+    void ownedBottom(int n,ISP_Joshua j){
+        if(j.tileOwnedBy(n)!=0){
+            int id=j.tileOwnedBy(n);
+            boardGame.drawImage(j.getMonopolyPiece(id,0),670-(int)(560*(n-1)/9.0)+20,685-25-20,null);
+        }
+    }
+    void ownedLeft(int n,ISP_Joshua j){
+        if(j.tileOwnedBy(n)!=0){
+            int id=j.tileOwnedBy(n);
+            n-=10;
+            boardGame.drawImage(j.getMonopolyPiece(id,1), 75+25, 670-(int)(560*(n-1)/9.0)+20,null);
+        }
+    }
+    void ownedTop(int n,ISP_Joshua j){
+        if(j.tileOwnedBy(n)!=0){
+            int id=j.tileOwnedBy(n);
+            n-=20;
+            boardGame.drawImage(j.getMonopolyPiece(id,2), 90-20+(int)(560*(n-1)/9.0)-20, 75+25,null);
+        }
+    }
+    void ownedRight(int n,ISP_Joshua j){
+        if(j.tileOwnedBy(n)!=0){
+            int id=j.tileOwnedBy(n);
+            n-=30;
+            boardGame.drawImage(j.getMonopolyPiece(id,3), 685-25-20, 90-20+(int)(560*(n-1)/9.0)-20,null);
+        }
+    }
+    void drawOwnedTiles(ISP_Joshua j){
+        for(int i=1; i<=j.NUMBEROFTILES; i++){
+            if(i<11)ownedBottom(i,j);
+            else if(i<21)ownedLeft(i,j);
+            else if(i<31)ownedTop(i,j);
+            else if(i<41)ownedRight(i,j);
+        }
+    }
     void modifyTwoBalance(int amount, int player1,int player2,ISP_Joshua j){
+        drawOwnedTiles(j);
         drawPlayerList(j);
         boardGame.setFont(playerInfo);
         boardGame.setColor(loseMoney);
@@ -104,6 +140,7 @@ public class DrawGame{
         drawPlayerList(j);
     }
     void modifyBalance(int amount,int playerId,ISP_Joshua j){
+        drawOwnedTiles(j);
         drawPlayerList(j);
         boardGame.setFont(playerInfo);
         //boardGame.drawString("$"+j.balance[i], 840, 150*(i-1)+90);
@@ -164,6 +201,7 @@ public class DrawGame{
     }
     void drawScreenExcCurPlayer(ISP_Joshua j){
         drawBoard();
+        drawOwnedTiles(j);
         drawPlayerList(j);
         for(int i=1; i<j.numOfPlayers; i++){
             if(i!=j.curPlayer){
@@ -213,5 +251,8 @@ public class DrawGame{
         boardGame.setColor(playerListBG);
         boardGame.fillRect(860, 150*(playedId-1)+100,100, 60);
         boardGame.setColor(defaultBG);
+    }
+    void close(){
+        boardGame.close();
     }
 }

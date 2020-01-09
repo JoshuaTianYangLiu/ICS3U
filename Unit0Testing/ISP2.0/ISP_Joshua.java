@@ -6,12 +6,12 @@ import java.awt.image.*;
 import javax.imageio.*;
 
 public class ISP_Joshua{
-    DrawGame gui;
+    DrawGame gameGui;
     //Player id will start from 1
     //Tiles with start from 1
     final int NUMBEROFTILES=40;
     int numOfPlayers=(2)+1;
-    int initialBalance=100;
+    int initialBalance=1500;
     int bankAmount=0;
     boolean hasGetOutOfJail[]=new boolean[numOfPlayers];
     boolean inJail[] = new boolean[numOfPlayers];
@@ -63,17 +63,17 @@ public class ISP_Joshua{
     }
     void addGetOutOfJail(){
         hasGetOutOfJail[curPlayer]=true;
-        gui.drawGetOutOfJail(curPlayer);
+        gameGui.drawGetOutOfJail(curPlayer);
     }
     void useGetOutOfJailCard(){
         inJail[curPlayer]=false;
         hasGetOutOfJail[curPlayer]=true;
-        gui.hideGetOutOfJail(curPlayer);
+        gameGui.hideGetOutOfJail(curPlayer);
     }
     void moveBack(int spaces){
         int origPos=positionOfPlayers[curPlayer];
         positionOfPlayers[curPlayer]-=spaces;
-        gui.moveBack(origPos,positionOfPlayers[curPlayer], this);
+        gameGui.moveBack(origPos,positionOfPlayers[curPlayer], this);
         //As this is only activated by chance tiles this will have loop over from the start
     }
     void moveUntil(int id){
@@ -98,36 +98,36 @@ public class ISP_Joshua{
         positionOfPlayers[curPlayer]+=n;
         if(positionOfPlayers[curPlayer]>NUMBEROFTILES){    //That mean they passed go
             positionOfPlayers[curPlayer]-=NUMBEROFTILES;
-            gui.moveFromTo(originalPos, positionOfPlayers[curPlayer],this);
+            gameGui.moveFromTo(originalPos, positionOfPlayers[curPlayer],this);
             addMoney(200);
         }else{
-            gui.moveFromTo(originalPos, positionOfPlayers[curPlayer],this);
+            gameGui.moveFromTo(originalPos, positionOfPlayers[curPlayer],this);
         }
         
     }
     void transferMoney(int amount,int player1,int player2){
         balance[player1]-=amount;
         balance[player2]+=amount;
-        gui.modifyTwoBalance(amount, player1, player2, this);
+        gameGui.modifyTwoBalance(amount, player1, player2, this);
     }
     void transferMoney(int amount,int player){  //Transfer money from curplayer to player
         transferMoney(amount,curPlayer,player);
     }
     void addMoney(int amount,int playerId){  //This will have an animation added
         balance[playerId]+=amount;
-        gui.modifyBalance(amount,playerId, this);
+        gameGui.modifyBalance(amount,playerId, this);
     }
     void removeMoney(int amount,int playerId){  //This will have an animation added
         balance[playerId]-=amount;
-        gui.modifyBalance(-amount,playerId, this);
+        gameGui.modifyBalance(-amount,playerId, this);
     }
     void addMoney(int amount){  //This will have an animation added
         balance[curPlayer]+=amount;
-        gui.modifyBalance(amount, this);
+        gameGui.modifyBalance(amount, this);
     }
     void removeMoney(int amount){  //This will have an animation added
         balance[curPlayer]-=amount;
-        gui.modifyBalance(-amount, this);
+        gameGui.modifyBalance(-amount, this);
     }
     void runAuction(OwnableTile land){ //TODO: Run auction for property
         String info = land.getFullInfo();
@@ -221,7 +221,7 @@ public class ISP_Joshua{
     void payTax(int amount){
         balance[curPlayer]-=amount;
         bankAmount+=amount;
-        gui.modifyBalance(-amount, this);
+        gameGui.modifyBalance(-amount, this);
     }
     void collectTax(){
         if(bankAmount!=0){
@@ -248,50 +248,19 @@ public class ISP_Joshua{
         positionOfPlayers[curPlayer]=posOfJailZone;
         inJail[curPlayer]=true;
         turnsInJail[curPlayer]=0;
-        gui.moveToJail(posOfJailZone, this);
+        gameGui.moveToJail(posOfJailZone, this);
     }
-    void displayMortgage(){
-        Console mortgage = new Console("Mortgage/Unmortgage");
-        int tilesOwned[] = new int[NUMBEROFTILES+1];
-        int arrPointer=1;
-        for(int i=1; i<=NUMBEROFTILES; i++){
-            if(monopolyTiles[i].getTileType()==3||
-            monopolyTiles[i].getTileType()==2||
-            monopolyTiles[i].getTileType()==10){
-                OwnableTile t = (OwnableTile)monopolyTiles[i];
-                if(t.getOwnerId()==curPlayer){
-                    tilesOwned[arrPointer++]=i;
-                }
-            }
+    int tileOwnedBy(int pos){
+        if(isOwnableTile(pos)){
+            OwnableTile t=(OwnableTile)monopolyTiles[pos];
+            return t.getOwnerId();
         }
-        while(true){
-            mortgage.clear();
-            mortgage.println(nameOfPlayer[curPlayer]+" \'s balance: $"+balance[curPlayer]);
-            mortgage.print("Name",40);
-            mortgage.println("Status");
-            mortgage.println("----------------------------------------------------");
-            for(int i=1; i<arrPointer; i++){
-                mortgage.print(i+": "+monopolyTiles[tilesOwned[i]].getInfo(),40);
-                OwnableTile t = (OwnableTile)monopolyTiles[tilesOwned[i]];
-                if(t.isMortgaged())mortgage.println("Mortgaged");
-                else mortgage.println("Not Mortgaged");
-            }
-            int choice;
-            if(arrPointer==1){
-                choice = Util.queryInt("Please choose an option:\n"+
-                                        "0: Close window", "Please choose a valid option","Mortgage/Unmortgage",0,arrPointer-1);
-            }else{
-                choice = Util.queryInt("Please choose an option:\n"+
-                                        "0: Close window\n"+
-                                        "1-"+(arrPointer-1)+": Mortgage/Unmortgage property", "Please choose a valid option","Mortgage/Unmortgage",0,arrPointer-1);
-            }
-            if(choice==0)break;
-            //TODO: Add option to confirm
-            OwnableTile t = (OwnableTile)monopolyTiles[tilesOwned[choice]];
-            if(t.isMortgaged())t.unMortgage(this);
-            else t.mortgage(this);
-        }
-        mortgage.close();
+        return 0;
+    }
+    boolean isOwnableTile(int n){
+        return monopolyTiles[n].getTileType()==3||
+                monopolyTiles[n].getTileType()==2||
+                monopolyTiles[n].getTileType()==10;
     }
     int getMinOfColourSet(int colourId){
         int retVal=5;
@@ -436,13 +405,16 @@ public class ISP_Joshua{
         nameOfPlayer[0]="No One";
         nameOfPlayer[1]="Player 1 (CAT)";   //TODO: TEMP LINES
         nameOfPlayer[2]="Player 2 (SHIP)";
+        // nameOfPlayer[3]="Justin";
+        // nameOfPlayer[4]="Josh";
         //Choose pieces
         choosePieces();
-        // randomizePlayers();
-        gui=new DrawGame(this);
+        randomizePlayers();
+        gameGui=new DrawGame(this);
+        long timeElasped=System.currentTimeMillis();
         beginTurn:
         while(true){
-            gui.drawPlayerList(this);
+            gameGui.drawPlayerList(this);
             if(inJail[curPlayer]){
                 while(true){
                     int choice=Util.queryInt("You are in Jail. Choose an option\n"+
@@ -483,8 +455,11 @@ public class ISP_Joshua{
                                             "3: Buy/Sell Houses\n"+
                                             "4: Back to Menu", "Please choose a valid option",nameOfPlayer[curPlayer], 1,4);
                 if(choice==1)break;
-                if(choice==2)
-                    displayMortgage();
+                if(choice==2){
+                    DrawMortgage t = new DrawMortgage();
+                    t.draw(this);
+                    t.close();
+                }
                 if(choice==3)
                     displayHouses();
                 if(choice==4)
@@ -511,10 +486,20 @@ public class ISP_Joshua{
             Util.messageDialog("Move to "+getInfoStepsAhead(diceOne+diceTwo)+"\n","MONOPOLY");
             moveForward(diceOne+diceTwo);
             executeCurrentTile();
-            gui.drawPlayerList(this);
+            gameGui.drawPlayerList(this);
             removeLosers();
             if(hasWinner()){
-                Util.messageDialog("WINNER!\n"+nameOfPlayer[1],"MONOPOLY");
+                long sec=timeElasped;
+                long min=sec/60;
+                sec%=60;
+                long hour=min/60;
+                min%=60;
+                Util.messageDialog("WINNER!\n"+nameOfPlayer[1]+"\n"+
+                                    "Won with $"+balance[1]+"\n"+
+                                    "Time Elasped, "+hour+":"+min+":"+sec,"MONOPOLY");
+                //Save to leaderboard
+                gameGui.close();
+                gameGui=null;
                 break;
                 //Make sure to clear screen and stuff
             }
@@ -539,9 +524,7 @@ public class ISP_Joshua{
                 Util.messageDialog(nameOfPlayer[i]+", YOU LOSE!","MONOPOLY");
                 numOfPlayers--;
                 for(int k=1; k<=NUMBEROFTILES; k++){
-                    if(monopolyTiles[k].getTileType()==3||
-                        monopolyTiles[k].getTileType()==2||
-                        monopolyTiles[k].getTileType()==10){
+                    if(isOwnableTile(k)){
                         OwnableTile t = (OwnableTile)monopolyTiles[k];
                         if(i==t.getOwnerId())t.reset();;
                     }
@@ -554,9 +537,7 @@ public class ISP_Joshua{
                     balance[j]=balance[j+1];
                     nameOfPlayer[j]=nameOfPlayer[j+1];
                     for(int k=1; k<=NUMBEROFTILES; k++){
-                        if(monopolyTiles[k].getTileType()==3||
-                            monopolyTiles[k].getTileType()==2||
-                            monopolyTiles[k].getTileType()==10){
+                        if(isOwnableTile(k)){
                             OwnableTile t = (OwnableTile)monopolyTiles[k];
                             if(j+1==t.getOwnerId())t.tranferOwnership(j);
                         }
@@ -566,10 +547,8 @@ public class ISP_Joshua{
         }
     }
     void rollDice(){
-        diceOne=3;
-        diceTwo=1;
-        // diceOne=(int)(6*Math.random()+1);
-        // diceTwo=(int)(6*Math.random()+1);
+        diceOne=(int)(6*Math.random()+1);
+        diceTwo=(int)(6*Math.random()+1);
     }
     void loadAssets(){
         /*
