@@ -33,11 +33,13 @@ public class Railroad implements Tile,OwnableTile{
         if(isMortgaged){
             Util.messageDialog(name+" is mortgaged\n"+
                                 "Property owned by "+j.nameOfPlayer[ownerId], name);
-        }else{
+        }else if(j.canCollectRentInJail(ownerId)){
             int numberOfRails=j.numberOfTilesOwned(3,ownerId);
             Util.messageDialog("You landed on "+name+"\n"+
                                 "Pay "+j.nameOfPlayer[ownerId]+" $"+rentCost[numberOfRails]+".","Pay rent on "+name);
             j.transferMoney(rentCost[numberOfRails],ownerId);
+        }else{
+            Util.messageDialog("Owner in jail, no rent paid","Do not pay rent on "+name);
         }
     }
     public void executeTile(ISP_Joshua j){
@@ -104,6 +106,12 @@ public class Railroad implements Tile,OwnableTile{
         "If 2 Stations are owned: $"+rentCost[2]+'\n'+
         "If 3 Stations are owned: $"+rentCost[3]+'\n'+
         "If 4 Stations are owned: $"+rentCost[4]+'\n';
+    }
+    public int getMortgage(){
+        return cost/2;
+    }
+    public int getUnMortgage(){
+        return unMortgageValue;
     }
 }
 /*

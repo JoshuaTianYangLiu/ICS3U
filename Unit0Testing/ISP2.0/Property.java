@@ -53,7 +53,7 @@ public class Property implements Tile,OwnableTile{
         if(isMortgaged){
             Util.messageDialog(name+" is mortgaged\n"+
                                 "Property owned by "+j.nameOfPlayer[ownerId], name);
-        }else{
+        }else if(j.canCollectRentInJail(ownerId)){
             if(tierLevel==0){
                 Util.messageDialog("You landed on "+name+"\n"+
                                     "Pay "+j.nameOfPlayer[ownerId]+" $"+tierCost[tierLevel]+".","Pay rent on "+name);
@@ -65,6 +65,8 @@ public class Property implements Tile,OwnableTile{
                                     "Pay "+j.nameOfPlayer[ownerId]+" $"+tierCost[tierLevel]+".","Pay rent on "+name);
             }
             j.transferMoney(tierCost[tierLevel],ownerId);
+        }else{
+            Util.messageDialog("Owner in jail, no rent paid","Do not pay rent on "+name);
         }
     }
     void buyHouse(ISP_Joshua j){    //In my words, move up a tier level
@@ -196,21 +198,21 @@ public class Property implements Tile,OwnableTile{
     }
     public String getColourName(){
         switch(propertyColour){
-            case 1:
-                return "Brown";
             case 2:
-                return "Light Blue";
+                return "Brown";
             case 3:
-                return "Purple";
+                return "Light Blue";
             case 4:
-                return "Orange";
+                return "Purple";
             case 5:
-                return "Red";
+                return "Orange";
             case 6:
-                return "Yellow";
+                return "Red";
             case 7:
-                return "Green";
+                return "Yellow";
             case 8:
+                return "Green";
+            case 9:
                 return "Blue";
         }
         return "";
@@ -250,6 +252,12 @@ public class Property implements Tile,OwnableTile{
             "Rent with hotel: $"+tierCost[5]+'\n'+
             "Houses cost: $"+houseCost+'\n'+
             "Hotel cost: $"+hotelCost;
+    }
+    public int getMortgage(){
+        return mortgageValue;
+    }
+    public int getUnMortgage(){
+        return unMortgageValue;
     }
 }
 /*

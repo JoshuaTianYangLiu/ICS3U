@@ -7,7 +7,7 @@ Mortgage and unmortgage                                         DONE
 Buy/Sell houses                                                 DONE NEEDS TESTING
 Add chance/community chest commands to files                    DONE
 randomize the order of players when the game starts             DONE NEEDS TESTING
-Trading                                                         God this would be a pain
+Trading                                                         God this would be a pain//I really might need to add this
 Implement MakeThemLose                                          DONE NEEDS TESTING
 Reimplement Chance/Community Chest to work without queue        DONE NEEDS TESTING
 Remove arraylist from player inventory. Will just search through every tile instead     DONE
@@ -15,21 +15,26 @@ Implement player lose method                                    DONE NEEDS TESTI
 Make sure to add checks in the places needed to see if player loses DONE
 replace '-' to '\n' in community chest,tax,and chance           DONE
 Do some updating on Tax.java                                    DONE
-Add ingame time to display when win
+Add ingame time to display when win                             DONE
 Pay bail to Jail                                                DONE
+Add better error trapping, maybe go back to menu if hit with error
 
 
 GUI,
 Board                                                           DONE
 Mortgage/unmortgage                                             DONE
 Animation to add/deduct money from people's balance             DONE
-Buy/Sell
+Buy/Sell                                                        DONE
 players                                                         DONE
 Draw image when the player pays for property                    DONE
 Resize windows to work on rtp                                   DONE huh, somehow works on vscode and rtp
+List color/type in mortgage/unmortgage and buy/Sell             DONE
+Add price to mortgage and sell                                  DONE
 
 
 I should do,
 Better way to display info for better debugging                 DONE
 Add a error trapping display method to Util.java
 Check for code consistency
+
+Comment

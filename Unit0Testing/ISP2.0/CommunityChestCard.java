@@ -43,7 +43,7 @@ public class CommunityChestCard{    //TODO: Clean up code from removing the Tile
             j.payTax(totalPayment);
         }else if(operation.equals("GETPLAYERS")){
             for(int i=1; i<j.numOfPlayers; i++){
-                if(i!=j.curPlayer){
+                if(i!=j.curPlayer&&j.canCollectRentInJail(i)){
                     j.transferMoney(value1, i,j.curPlayer);
                 }
             }

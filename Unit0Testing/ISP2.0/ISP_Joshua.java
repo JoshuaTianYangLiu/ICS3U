@@ -1,16 +1,18 @@
 import hsa.Console;
 import java.io.*;
 import java.util.*;
-import java.awt.*;
 import java.awt.image.*;
 import javax.imageio.*;
+import java.awt.*;
 
 public class ISP_Joshua{
     DrawGame gameGui;
+    Console c;
     //Player id will start from 1
     //Tiles with start from 1
     final int NUMBEROFTILES=40;
     int numOfPlayers=(2)+1;
+    int pauseTime=500;
     int initialBalance=1500;
     int bankAmount=0;
     boolean hasGetOutOfJail[]=new boolean[numOfPlayers];
@@ -24,33 +26,250 @@ public class ISP_Joshua{
     ChanceCard chancePile[];
     CommunityChestCard communityChestPile[];
     BufferedImage monopolyPieces[][] = new BufferedImage[numOfPlayers][4];
+    BufferedImage background;
+    Font textTitle=new Font("Cambria",Font.PLAIN,40);
+    Font textHeader=new Font("Cambria",Font.PLAIN,20);
+    Font textInfo = new Font ("Times New Roman", Font.PLAIN, 20);
     // int propertyToPlayer[] = new int[numOfPlayers];
     // int propertyToHotel[] = new int[numOfPlayers];   //Player can own a max of 1 hotel
     // int propertyToHouse[] = new int[numOfPlayers];  //Player can own a max of __ hotel
     int curPlayer;
+    boolean canCollectRentInJail=true,hasFreeParking=true;
     ISP_Joshua(){
+        c=new Console(25,80,"ISP_Joshua");
     }
     void splashScreen(){
-
+        //Prob not gonna get this part
     }
     int mainMenu(){
-        // Util.messageDialog("This is main menu", "Main Menu");
-        return 1;
+        title("Main Menu");
+        c.setFont(textHeader);
+        displayInfo("1: Display\n"+
+                    "2: Instructions\n"+
+                    "3: Rules\n"+
+                    "4: Settings\n"+
+                    "5: Scoreboard\n"+
+                    "6: Exit",250,40);
+        return Util.queryInt("Please choose an option\n"+
+                            "1: Display\n"+
+                            "2: Instructions\n"+
+                            "3: Rules\n"+
+                            "4: Settings\n"+
+                            "5: Scoreboard\n"+
+                            "6: Exit" , "Please choose a valid option","Main Menu",1,6);
     }
     void instructions(){
-
+        title("Instructions");
+        c.setFont(textInfo);
+        displayInfo("Step 1: Roll the dice and move the corresponding amount\n"+
+                    "Step 2: Buy/Auction an unowned property\n"+
+                    "Step 3: Collect rent if someone lands on your properties\n"+
+                    "Step 4: Become a monopoly and be the last man standing", 50, 30);
+        pressAnyKey();
     }
     void rules(){
-
+        int pageNum=1;
+        
+        //Official rules from https://en.wikibooks.org/wiki/Monopoly/Official_Rules
+        while(true){
+            title("Rules");
+            c.setFont(textInfo);
+        //                                                                               |||
+            if(pageNum==1){
+                displayInfo("On a player's turn, the player must roll the dice and move\n"+
+                            "his/her token forward the number of spaces as rolled on the\n"+
+                            "dice. In some editions, players must do any trades, building\n"+
+                            "improvements etc. at the start of their turn before rolling\n"+
+                            "the dice.\n",50,30);
+            }else if(pageNum==2){
+                displayInfo("If the player lands on an unowned property, the player may buy\n"+
+                            "it for the price listed on that property's space. If he or she\n"+
+                            "agrees to buy it, he or she pays the Bank the amount shown on\n"+
+                            "the property space and receives the deed for that property. If\n"+
+                            "he or she refuses to buy the property for the amount stated on\n"+
+                            "the deed, the property is auctioned. Bidding may start at any\n"+
+                            "price, and all players may bid. The highest bidder wins the\n"+
+                            "property and pays the Bank the amount bid and receives the\n"+
+                            "property's title deed. Railroads and utilities are also\n"+
+                            "considered properties.\n",50,30);
+            }else if(pageNum==3){
+                displayInfo("If the player lands on an unmortgaged property owned by\n"+
+                            "another player, he or she pays rent to that person, as specified\n"+
+                            "on the property's deed. It is the property owner's responsibility\n"+
+                            "to demand rent, and he or she has until the beginning of the\n"+
+                            "second following player's turn to do so.\n",50,30);
+            }else if(pageNum==4){
+                displayInfo("If the player lands on his or her own property, or on property\n"+
+                            "which is owned by another player but currently mortgaged,\n"+
+                            "nothing happens.\n", 50,30);
+            }else if(pageNum==5){
+                displayInfo("If the player lands on Luxury Tax/Super Tax, he or she must\n"+
+                            "pay the Bank $100 (in some editions of the game, only $75).\n", 50,30);
+            }else if(pageNum==6){
+                displayInfo("If the player lands on Income Tax he or she must pay the Bank\n"+
+                            "$200",50,30);
+            }else if(pageNum==7){
+                displayInfo("If the player lands on a Chance or Community Chest, the player\n"+
+                            "takes a card from the top of the respective pack and performs\n"+
+                            "the instruction given on the card.\n",50,30);
+            }else if(pageNum==8){
+                displayInfo("If the player lands on the Jail space, he or she is \"Just\n"+
+                            "Visiting\". No penalty applies.\n",50,30);
+            }else if(pageNum==9){
+                displayInfo("If the player lands on the Go to Jail square, he or she must\n"+
+                            "move his token directly to Jail.\n", 50, 30);
+            }else if(pageNum==10){
+                displayInfo("If the player lands on or passes Go in the course of his or\n"+
+                            "her turn, he or she receives $200 from the Bank. A player has\n"+
+                            "until the beginning of his or her next turn to collect this money.\n",50,30);
+            }else if(pageNum==11){
+                displayInfo("You may sell houses back to the Bank for half the purchase\n"+
+                            "price or sell property deeds to other players in the game.\n",50,30);
+            }else if(pageNum==12){
+                displayInfo("If a player skips another player's turn and is caught,\n"+
+                            "the turn is transferred back to the player whose turn was\n"+
+                            "skipped.\n",50,30);
+            }
+            if(pageNum==1){
+                int choice=Util.optionDialog("Please choose an option","Da Rules", new String[] {"Back to Main Menu","Next Page"});
+                if(choice==0)break;
+                if(choice==1)pageNum++;
+            }else if(pageNum==12){
+                int choice=Util.optionDialog("Please choose an option","Da Rules", new String[] {"Previous Page","Back to Main Menu"});
+                if(choice==0)pageNum--;
+                if(choice==1)break;
+            }else{
+                int choice=Util.optionDialog("Please choose an option","Da Rules", new String[] {"Back to Main Menu","Previous Page","Next Page"});
+                if(choice==0)break;
+                if(choice==1)pageNum--;
+                if(choice==2)pageNum++;
+            }
+        }
     }
     void settings(){
-
+        title("Settings");
+        c.setFont(textHeader);
+        while(true){
+            String output="";
+            output+="1: Number of players:                             "+(numOfPlayers-1)+'\n';
+            output+="2: Pause between animations:               "+pauseTime+"ms\n";
+            output+="3: Initial balance:                                     "+initialBalance+'\n';
+            output+="4: Collect rent in jail?                               "+(canCollectRentInJail?"Yes":"No")+'\n';
+            output+="5: Collect money on free parking?          "+(hasFreeParking?"Yes":"No")+'\n';
+            displayInfo(output,50,40);
+            int choice=Util.queryInt("Please choose an option to change\n"+
+                                    "0: Back to Main Menu\n"+
+                                    "1: Number of players\n"+
+                                    "2: Pause between animations\n"+
+                                    "3: Initial Balance\n"+
+                                    "4: Collect rent in jail\n"+
+                                    "5: Collect money on free parking","Invalid choice!","Settings",0,5);
+            if(choice==0)break;
+            if(choice==1){
+                numOfPlayers=Util.queryInt("Specify number of players.\n2-4", "Invalid input!","Settings",2,4)+1;
+            }else if(choice==2){
+                pauseTime=Util.queryInt("Specify pause between animations in ms","Invalid input!","Settings",100,1000);
+            }else if(choice==3){
+                initialBalance=Util.queryInt("Specify initial balance","Invalid input!","Settings",1,999999);
+            }else if(choice==4){
+                canCollectRentInJail=Util.optionDialog("Collect rent in jail?","Settings",new String[]{"Yes","No"})==0;
+            }else if(choice==5){
+                hasFreeParking=Util.optionDialog("Collect money on free parking?","Settings",new String[]{"Yes","No"})==0;
+            }
+        }
     }
     void goodbye(){
-
+        c.drawImage(background,0,0,null);
+        c.setFont(textTitle);
+        c.setColor(Color.WHITE);
+        c.drawString("Thank you for using my program.",50,75);
+        c.setFont(textHeader);
+        credits();
+        pressAnyKey("Press any key to quit");
+        c.close();
     }
     void scoreboard(){
+        BufferedReader file=null;
+        try{
+        file = new BufferedReader(new FileReader("assets\\Scoreboard.txt"));
+        }catch(Exception e){
+            System.out.println("Scoreboard.txt does not exist");
+            e.printStackTrace();
+            System.exit(1);
+        }
+        String fileContent="",fileLine="";
+        while(true){
+            try{
+                fileLine=file.readLine();
+            }catch(Exception e){}
+            if(fileLine==null)break;
+            fileContent+=fileLine+'\n';
+        }
+        String contents[] = fileContent.split("\n");
+        int len=contents.length/2;
+        for(int i=0; i<len-1; i++){
+            for(int j=0; j<len-i-1; j++){
+                int a=Integer.parseInt(contents[2*j+1]);
+                int b=Integer.parseInt(contents[2*j+3]);
+                if(a<b){
+                    String temp=contents[2*j];
+                    contents[2*j]=contents[2*j+2];
+                    contents[2*j+2]=temp;
+                    temp=contents[2*j+1];
+                    contents[2*j+1]=contents[2*j+3];
+                    contents[2*j+3]=temp;
+                }
+            }
+        }
+        title("Scoreboard");
+        c.setFont(textInfo);
+        String outputName="";
+        String outputScore="";
+        for(int i=0; i<Math.min(len,10); i++){
+            outputName+=(i+1)+": "+contents[2*i]+'\n';
+            outputScore+="$"+contents[2*i+1]+'\n';
+        }
+        displayInfo(outputName, 50,30);
+        displayInfo(outputScore,400,30);
+        pressAnyKey();
         //I will score it by whoever has the most money
+    }
+    void addToScoreboard(String name,int balance){
+        PrintWriter fileOutput=null;
+        try{
+            fileOutput=new PrintWriter(new FileWriter("assets\\Scoreboard.txt",true));
+        }catch(Exception e){
+            System.out.println("Scoreboard.txt does not exist");
+            e.printStackTrace();
+            System.exit(1);
+        }
+        fileOutput.println(name);
+        fileOutput.println(balance);
+        fileOutput.close();
+    }
+    void pressAnyKey(String input){
+        c.drawString(input,215,450);
+        c.getChar();
+    }
+    void pressAnyKey(){
+        pressAnyKey("Press any key to continue");
+    }
+    void displayInfo(String input,int xOffset,int yGap){
+        String line[] = input.split("\n");
+        for(int i=0; i<line.length; i++){
+            c.drawString(line[i],xOffset,yGap*i+150);
+        }
+    }
+    void title(String title){
+        c.drawImage(background,0,0,null);
+        c.setFont(textTitle);
+        c.setColor(Color.WHITE);
+        c.drawString(title,50,75);
+        c.setFont(textHeader);
+        c.drawString("Monopoly",500,50);
+    }
+    void credits(){
+        c.drawString("Made By Joshua Liu",225,300);
     }
     void resetBoard(){
         curPlayer=1;
@@ -144,7 +363,7 @@ public class ISP_Joshua{
                                                 "Currently Bidding: "+nameOfPlayer[currentBidder]+".\n"+
                                                 "The current bid is $"+currentBid+".\n"+
                                                 "Currently winning: "+nameOfPlayer[winningBidId], "Auction",new String[] {"Bid","Fold"});
-                if(choice==0){
+                if(choice==0&&balance[currentBidder]>currentBid){
                     choice=Util.queryInt(land.getFullInfo()+"\n"+
                                         "-------------------------------------"+"\n"+
                                         "Currently Bidding: "+nameOfPlayer[currentBidder]+".\n"+
@@ -156,6 +375,14 @@ public class ISP_Joshua{
                     canBid[currentBidder]=false;
                     numberOfBidders--;
                 }
+            }else{
+                int choice = Util.optionDialog(land.getFullInfo()+"\n"+
+                                                "-------------------------------------"+"\n"+
+                                                "Currently Bidding: "+nameOfPlayer[currentBidder]+".\n"+
+                                                "The current bid is $"+currentBid+".\n"+
+                                                "Currently winning: "+nameOfPlayer[winningBidId], "Auction",new String[] {"Fold"});
+                numberOfBidders--;
+                canBid[currentBidder]=false;
             }
             if(numberOfBidders==1)break;
             currentBidder++;
@@ -229,6 +456,9 @@ public class ISP_Joshua{
             balance[curPlayer]+=bankAmount;
             bankAmount=0;
         }
+    }
+    boolean canCollectRentInJail(int id){
+        return inJail[id]?canCollectRentInJail:true;
     }
     void nextTurn(){
         curPlayer++;
@@ -349,16 +579,29 @@ public class ISP_Joshua{
         if(pos>NUMBEROFTILES)pos-=NUMBEROFTILES;
         return monopolyTiles[pos].getInfo();
     }
+    boolean nameTaken(int i){
+        for(int j=1; j<i; j++){
+            if(nameOfPlayer[i].equals(nameOfPlayer[j])){
+                return true;
+            }
+        }
+        return false;
+    }
     void display(){
+        c.close();
         int concurrentDoubles=0;
         //Choose number of players Max is 4
         resetBoard();
         //Choose names
         nameOfPlayer[0]="No One";
-        nameOfPlayer[1]="Player 1 (CAT)";   //TODO: TEMP LINES
-        nameOfPlayer[2]="Player 2 (SHIP)";
-        // nameOfPlayer[3]="Justin";
-        // nameOfPlayer[4]="Josh";
+        for(int i=1; i<numOfPlayers;){
+            nameOfPlayer[i]=Util.inputDialog("Player "+i+", choose your name.","Invalid name","MONOPOLY");
+            if(nameTaken(i)){
+                Util.messageDialog("Name Taken","MONOPOLY");
+            }else{
+                i++;
+            }
+        }
         //Choose pieces
         choosePieces();
         randomizePlayers();
@@ -371,31 +614,44 @@ public class ISP_Joshua{
                 while(true){
                     int choice=Util.queryInt("You are in Jail. Choose an option\n"+
                                             "1: Roll dice\n"+
-                                            "2: Use get out of jail card",
-                                            "Please choose option 1 or 2.","JAIL", 1, 2);
+                                            "2: Use get out of jail card\n"+
+                                            "3: Pay $200 bail",
+                                            "Please choose option 1 or 2.","JAIL", 1, 3);
                     if(choice==1){
                         rollDice();
                         if(diceOne==diceTwo){
                             Util.messageDialog("You rolled a "+diceOne+" and "+diceTwo+".\n"+
                                                 "You are released!", "JAIL");
                             inJail[curPlayer]=false;
-                            break;
+                            turnsInJail[curPlayer]=0;
+                            break;  //continue turn TODO: Figure out which should continue the player's turn and which should move to the next
                         }else{
                             Util.messageDialog("You rolled a "+diceOne+" and "+diceTwo+".\n"+
                                                 "Still in jail.", "JAIL");
                             turnsInJail[curPlayer]++;
                             if(turnsInJail[curPlayer]==3){
                                 inJail[curPlayer]=false;
+                                turnsInJail[curPlayer]=0;
                             }
                             nextTurn();
-                            continue beginTurn;
+                            continue beginTurn; //Go to next turn
                         }
-                    }else{
+                    }else if(choice==2){
                         if(hasGetOutOfJail[curPlayer]){
                             useGetOutOfJailCard();
-                            break;
+                            break;  //Continue player's turn
                         }else{
                             Util.messageDialog("You do not have a get out of jail card!","JAIL");
+                        }
+                    }else if(choice==3){
+                        if(getBalance()>=200){
+                            removeMoney(200);
+                            inJail[curPlayer]=false;
+                            turnsInJail[curPlayer]=0;
+                            nextTurn();
+                            continue beginTurn;
+                        }else{
+                            Util.messageDialog("You do not have enough to pay bail","JAIL");
                         }
                     }
                 }
@@ -405,7 +661,8 @@ public class ISP_Joshua{
                                             "1: Roll dice\n"+
                                             "2: Mortgage/Unmortgage\n"+
                                             "3: Buy/Sell Houses\n"+
-                                            "4: Back to Menu", "Please choose a valid option",nameOfPlayer[curPlayer], 1,4);
+                                            "4: Trade\n"+
+                                            "5: Back to Menu\n", "Please choose a valid option",nameOfPlayer[curPlayer], 1,5);
                 if(choice==1)break;
                 if(choice==2){
                     DrawMortgage t = new DrawMortgage();
@@ -417,8 +674,17 @@ public class ISP_Joshua{
                     t.draw(this);
                     t.close();
                 }
-                if(choice==4)
+                if(choice==4){
+                    DrawAuction t = new DrawAuction();
+                    t.draw(this);
+                    t.close();
+                }
+                if(choice==5){
+                    gameGui.close();
+                    gameGui=null;
+                    c=new Console(25,80,"ISP_Joshua");
                     break beginTurn;
+                }
             }
             rollDice();
             Util.messageDialog("--------------------------\n"+
@@ -452,9 +718,11 @@ public class ISP_Joshua{
                 Util.messageDialog("WINNER!\n"+nameOfPlayer[1]+"\n"+
                                     "Won with $"+balance[1]+"\n"+
                                     "Time Elasped, "+hour+":"+min+":"+sec,"MONOPOLY");
-                //Save to leaderboard
+                //Save to leaderboard TODO
                 gameGui.close();
                 gameGui=null;
+                addToScoreboard(nameOfPlayer[1],balance[1]);
+                c=new Console(25,80,"ISP_Joshua");
                 break;
                 //Make sure to clear screen and stuff
             }
@@ -687,7 +955,11 @@ public class ISP_Joshua{
                 System.exit(1);
             }
         }
-        //TODO: Also load the community chest and chance cards into array
+        try{
+            background=ImageIO.read(new File("assets\\Images\\Background.png"));
+        }catch(Exception e){
+            System.exit(1);
+        }
     }
     
 

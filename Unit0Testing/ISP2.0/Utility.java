@@ -27,7 +27,7 @@ public class Utility implements Tile,OwnableTile{
         if(isMortgaged){
             Util.messageDialog(name+" is mortgaged\n"+
                                 "Property owned by "+j.nameOfPlayer[ownerId], name);
-        }else{
+        }else if(j.canCollectRentInJail(ownerId)){
             int utilitiesOwned=j.numberOfTilesOwned(10,ownerId);
             int totalCost=j.diceOne+j.diceTwo;
             Util.messageDialog("You landed on "+name+"\n"+
@@ -40,6 +40,8 @@ public class Utility implements Tile,OwnableTile{
             }else{
                 j.transferMoney(multiplier2*totalCost,ownerId);
             }
+        }else{
+            Util.messageDialog("Owner in jail, no rent paid","Do not pay rent on "+name);
         }
     }
     public void executeTile(ISP_Joshua j){
@@ -103,6 +105,12 @@ public class Utility implements Tile,OwnableTile{
             "If one Utility is owned, rent is "+multiplier1+" times amount shown on dice."+'\n'+
             "If both Utilities are owned, rent is "+multiplier2+" times amount shown on dice";
 
+    }
+    public int getMortgage(){
+        return cost/2;
+    }
+    public int getUnMortgage(){
+        return unMortgage;
     }
 }
 /*

@@ -16,7 +16,7 @@ public class DrawGame{
     DrawGame(ISP_Joshua j){
         boardGame=new Console(38,125,"Monopoly");
         try{
-            boardImage=ImageIO.read(new File("assets\\Images\\MonopolyBoard1.jpg"));
+            boardImage=ImageIO.read(new File("assets\\Images\\MonopolyBoard.jpg"));
             //999x760
             getOutOfJailImg=ImageIO.read(new File("assets\\Images\\GetOutOfJail.png"));
         }catch(Exception e){
@@ -131,7 +131,7 @@ public class DrawGame{
         boardGame.setColor(gainMoney);
         boardGame.drawString("+"+amount, 900, 150*(player2-1)+90);
         try{
-            Thread.sleep(2000);
+            Thread.sleep(j.pauseTime);
         }catch(Exception e){
             //Thread interupted
             //TODO Fill this in
@@ -152,7 +152,7 @@ public class DrawGame{
             boardGame.drawString("+"+amount, 900, 150*(playerId-1)+90);
         }
         try{
-            Thread.sleep(2000);
+            Thread.sleep(j.pauseTime);
         }catch(Exception e){
             //Thread interupted
             //TODO Fill this in
@@ -167,7 +167,7 @@ public class DrawGame{
     void moveBack(int pos,int newPos,ISP_Joshua j){
         while(pos>newPos){
             try{
-                Thread.sleep(750);
+                Thread.sleep(100);
             }catch(Exception e){
                 //Thread interrupted
                 e.printStackTrace();

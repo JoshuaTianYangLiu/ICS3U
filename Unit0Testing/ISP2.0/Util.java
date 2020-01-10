@@ -18,6 +18,18 @@ public class Util{
             }
         }
     }
+    static String inputDialog(String inputMessage,String errorMessage,String title){
+        String inputStr;
+        while(true){
+            try{
+                inputStr=JOptionPane.showInputDialog(null,inputMessage,title,JOptionPane.DEFAULT_OPTION);    //prompt for input
+                if(inputStr!=null&&!inputStr.equals("")) return inputStr;
+                JOptionPane.showMessageDialog(null, errorMessage,title,JOptionPane.WARNING_MESSAGE);   //Error trap
+            }catch(Exception e){
+                JOptionPane.showMessageDialog(null, errorMessage,title,JOptionPane.WARNING_MESSAGE);   //Error trap
+            }
+        }
+    }
     static int optionDialog(String message, String title,String[] choices){
         int retValue=0;
         while(true){

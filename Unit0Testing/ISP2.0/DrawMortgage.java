@@ -55,19 +55,26 @@ public class DrawMortgage{
         //TODO
         for(int i=1; i<arrPointer; i++){
             c.setColor(text);
+            //List with color TODO
             c.drawString(i+": "+j.monopolyTiles[tilesOwned[i]].getInfo(), 20, 25*i+40);
+            if(j.monopolyTiles[tilesOwned[i]].getTileType()==2){
+                Property p = (Property)j.monopolyTiles[tilesOwned[i]];
+                c.drawString(p.getColourName(), 300, 25*i+40);
+            }
             OwnableTile t = (OwnableTile)j.monopolyTiles[tilesOwned[i]];
             if(t.isMortgaged()){
                 c.setColor(isMortgaged);
-                c.fillRect(450, 25*i+20,270, 25);
+                c.fillRect(480, 25*i+20,270, 25);
                 c.setColor(text);
                 c.drawString("Mortgaged",500,25*i+40);
+                c.drawString("-"+t.getUnMortgage(),425,25*i+40);
             }
             else{
                 c.setColor(notMortgage);
-                c.fillRect(450, 25*i+20,270, 25);
+                c.fillRect(480, 25*i+20,270, 25);
                 c.setColor(text);
                 c.drawString("Not Mortgaged",500,25*i+40);
+                c.drawString("+"+t.getMortgage(),425,25*i+40);
             }
         }
     }
@@ -75,51 +82,3 @@ public class DrawMortgage{
         c.close();
     }
 }
-/*
-Console houses = new Console("Buy/Sell Houses");
-        int propertiesOwned[] = new int[NUMBEROFTILES+1];
-        int arrPointer=1;
-        for(int i=1; i<=NUMBEROFTILES; i++){
-            if(monopolyTiles[i].getTileType()==2){
-                OwnableTile t = (OwnableTile)monopolyTiles[i];
-                if(t.getOwnerId()==curPlayer){
-                    propertiesOwned[arrPointer++]=i;
-                }
-            }
-        }
-        while(true){
-            houses.clear();
-            houses.println(nameOfPlayer[curPlayer]+" \'s balance: $"+balance[curPlayer]);
-            houses.print("Name",30);
-            houses.print("Is mortgaged",15);
-            houses.print("Houses Owned",12);
-            houses.println("Hotels Owned",12);
-            houses.println("----------------------------------------------------");
-            for(int i=1; i<arrPointer; i++){
-                houses.print(i+": "+monopolyTiles[propertiesOwned[i]].getInfo(),30);
-                Property t = (Property)monopolyTiles[propertiesOwned[i]];
-                if(t.isMortgaged())houses.print("Mortgaged",15);
-                else houses.print("Not Mortgaged",15);
-                houses.print(t.getNumOfHouses(),12);
-                houses.println(t.getNumOfHotels(),12);
-            }
-            int choice;
-            if(arrPointer==1){
-                choice = Util.queryInt("Please choose an option:\n"+
-                                        "0: Close window", "Please choose a valid option","Buy/Sell",0,arrPointer-1);
-            }else{
-                choice = Util.queryInt("Please choose an option:\n"+
-                                        "0: Close window\n"+
-                                        "1-"+(arrPointer-1)+": Buy/Sell Houses", "Please choose a valid option","Mortgage/Unmortgage",0,arrPointer-1);
-            }
-            if(choice==0)break;
-            Property p = (Property)monopolyTiles[propertiesOwned[choice]];
-            int buyOrSell = Util.optionDialog(p.getFullInfo(),p.getInfo(), new String[]{"Buy","Sell"});
-            if(buyOrSell==0){   //Buy
-                p.buyHouse(this);
-            }else{  //Sell
-                p.sellHouse(this);
-            }
-        }
-        houses.close();
-*/

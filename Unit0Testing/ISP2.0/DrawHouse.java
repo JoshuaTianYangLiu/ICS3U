@@ -10,18 +10,18 @@ public class DrawHouse{
     Font textTitle=new Font("Cambria",Font.PLAIN,26);
     Font textInfo = new Font ("Times New Roman", Font.PLAIN, 20);
     DrawHouse(){
-        c=new Console(30,90,"");
+        c=new Console(30,90,"Buy/Sell Houses");
         //Load assets
     }
     //720x500
     void draw(ISP_Joshua j){
-        int tilesOwned[] = new int[j.NUMBEROFTILES+1];
+        int propertiesOwned[] = new int[j.NUMBEROFTILES+1];
         int arrPointer=1;
         for(int i=1; i<=j.NUMBEROFTILES; i++){
-            if(j.isOwnableTile(i)){
+            if(j.monopolyTiles[i].getTileType()==2){
                 OwnableTile t = (OwnableTile)j.monopolyTiles[i];
                 if(t.getOwnerId()==j.curPlayer){
-                    tilesOwned[arrPointer++]=i;
+                    propertiesOwned[arrPointer++]=i;
                 }
             }
         }
@@ -31,47 +31,89 @@ public class DrawHouse{
             c.setColor(text);
             c.setFont(textTitle);
             c.drawString("Name", 20,30);
-            c.drawString("Mortgage Status",500,30);
+            c.drawString("# of houses/hotels",500,30);
             c.setFont(textInfo);
-            drawList(tilesOwned, arrPointer, j);
+            drawList(propertiesOwned, arrPointer, j);
             int choice;
             if(arrPointer==1){
                 choice = Util.queryInt("Please choose an option:\n"+
-                                        "0: Close window", "Please choose a valid option","Mortgage/Unmortgage",0,arrPointer-1);
+                                        "0: Close window", "Please choose a valid option","Buy/Sell",0,arrPointer-1);
             }else{
                 choice = Util.queryInt("Please choose an option:\n"+
                                         "0: Close window\n"+
-                                        "1-"+(arrPointer-1)+": Mortgage/Unmortgage property", "Please choose a valid option","Mortgage/Unmortgage",0,arrPointer-1);
+                                        "1-"+(arrPointer-1)+": Buy/Sell Houses", "Please choose a valid option","Buy/Sell",0,arrPointer-1);
             }
             if(choice==0)break;
-            OwnableTile t = (OwnableTile)j.monopolyTiles[tilesOwned[choice]];
-            if(t.isMortgaged())t.unMortgage(j);
-            else t.mortgage(j);
+            Property p = (Property)j.monopolyTiles[propertiesOwned[choice]];
+            int buyOrSell = Util.optionDialog(p.getFullInfo(),p.getInfo(), new String[]{"Buy","Sell"});
+            if(buyOrSell==0){   //Buy
+                p.buyHouse(j);
+            }else{  //Sell
+                p.sellHouse(j);
+            }
         }
     }
-    void drawList(int[] tilesOwned,int arrPointer,ISP_Joshua j){
-        //arrPointer can be as large as 28
-        //Console window should hold nearly 28.
+    void drawList(int[] propertiesOwned,int arrPointer,ISP_Joshua j){
+        //arrPointer can be as large as 22
+        //Console window should hold nearly 22.
         //TODO
+        c.setColor(text);
         for(int i=1; i<arrPointer; i++){
-            c.setColor(text);
-            c.drawString(i+": "+j.monopolyTiles[tilesOwned[i]].getInfo(), 20, 25*i+40);
-            OwnableTile t = (OwnableTile)j.monopolyTiles[tilesOwned[i]];
-            if(t.isMortgaged()){
-                c.setColor(isMortgaged);
-                c.fillRect(450, 25*i+20,270, 25);
-                c.setColor(text);
-                c.drawString("Mortgaged",500,25*i+40);
-            }
-            else{
-                c.setColor(notMortgage);
-                c.fillRect(450, 25*i+20,270, 25);
-                c.setColor(text);
-                c.drawString("Not Mortgaged",500,25*i+40);
-            }
+            //List with color TODO
+            c.drawString(i+": "+j.monopolyTiles[propertiesOwned[i]].getInfo(), 20, 25*i+40);
+            Property t = (Property)j.monopolyTiles[propertiesOwned[i]];
+            c.drawString(t.getColourName(), 300, 25*i+40);
+            c.drawString(t.getNumOfHouses()+" houses, "+t.getNumOfHotels()+" hotels",500,25*i+40);
         }
     }
     void close(){
         c.close();
     }
 }
+/*
+Console houses = new Console("Buy/Sell Houses");
+        int propertiesOwned[] = new int[NUMBEROFTILES+1];
+        int arrPointer=1;
+        for(int i=1; i<=NUMBEROFTILES; i++){
+            if(monopolyTiles[i].getTileType()==2){
+                OwnableTile t = (OwnableTile)monopolyTiles[i];
+                if(t.getOwnerId()==curPlayer){
+                    propertiesOwned[arrPointer++]=i;
+                }
+            }
+        }
+        while(true){
+            houses.clear();
+            houses.println(nameOfPlayer[curPlayer]+" \'s balance: $"+balance[curPlayer]);
+            houses.print("Name",30);
+            houses.print("Is mortgaged",15);
+            houses.print("Houses Owned",12);
+            houses.println("Hotels Owned",12);
+            houses.println("----------------------------------------------------");
+            for(int i=1; i<arrPointer; i++){
+                houses.print(i+": "+monopolyTiles[propertiesOwned[i]].getInfo(),30);
+                Property t = (Property)monopolyTiles[propertiesOwned[i]];
+                if(t.isMortgaged())houses.print("Mortgaged",15);
+                else houses.print("Not Mortgaged",15);
+                houses.print(t.getNumOfHouses(),12);
+                houses.println(t.getNumOfHotels(),12);
+            }
+            int choice;
+            if(arrPointer==1){
+                choice = Util.queryInt("Please choose an option:\n"+
+                                        "0: Close window", "Please choose a valid option","Buy/Sell",0,arrPointer-1);
+            }else{
+                choice = Util.queryInt("Please choose an option:\n"+
+                                        "0: Close window\n"+
+                                        "1-"+(arrPointer-1)+": Buy/Sell Houses", "Please choose a valid option","Mortgage/Unmortgage",0,arrPointer-1);
+            }
+            if(choice==0)break;
+            Property p = (Property)monopolyTiles[propertiesOwned[choice]];
+            int buyOrSell = Util.optionDialog(p.getFullInfo(),p.getInfo(), new String[]{"Buy","Sell"});
+            if(buyOrSell==0){   //Buy
+                p.buyHouse(this);
+            }else{  //Sell
+                p.sellHouse(this);
+            }
+        }
+        houses.close();*/
