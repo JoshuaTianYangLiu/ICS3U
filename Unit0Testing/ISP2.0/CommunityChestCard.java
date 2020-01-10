@@ -1,4 +1,4 @@
-public class CommunityChestCard{    //TODO: Clean up code from removing the Tile interface
+public class CommunityChestCard{
     String message;
     String operation;
     int value1,value2;

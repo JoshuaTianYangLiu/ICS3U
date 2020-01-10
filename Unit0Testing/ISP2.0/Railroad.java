@@ -6,7 +6,6 @@ public class Railroad implements Tile,OwnableTile{
     int rentCost[] = new int[5];
     boolean isMortgaged;
     Railroad(String input)throws Exception{
-        //TODO: Add exception handler
         isMortgaged=false;
         String portions[] = input.split("\\|");     // Added \\ as escape characters 
         if(portions.length!=7){
@@ -29,7 +28,6 @@ public class Railroad implements Tile,OwnableTile{
         j.removeMoney(amount,playerId);
     } 
     void payRent(ISP_Joshua j){
-        //TODO: Get number of railroads owned
         if(isMortgaged){
             Util.messageDialog(name+" is mortgaged\n"+
                                 "Property owned by "+j.nameOfPlayer[ownerId], name);
@@ -50,7 +48,6 @@ public class Railroad implements Tile,OwnableTile{
                                     "2: Put up for auction",
                                     "Please enter a valid option 1,2",
                                     name,1,2);
-                                    //TODO: add an option to disable auctions
             if(choice==1){
                 if(j.getBalance()>=cost){
                     buyProperty(j,cost,j.curPlayer);

@@ -17,7 +17,8 @@ replace '-' to '\n' in community chest,tax,and chance           DONE
 Do some updating on Tax.java                                    DONE
 Add ingame time to display when win                             DONE
 Pay bail to Jail                                                DONE
-Add better error trapping, maybe go back to menu if hit with error
+Add better error trapping, maybe go back to menu if hit with error  DONE Most of the loading is done before playing the game, it's better to close if it goes wrong that give it nothing to do
+Maybe I can deal the error trapping differently?                Too much of a pain
 
 
 GUI,
@@ -34,7 +35,7 @@ Add price to mortgage and sell                                  DONE
 
 I should do,
 Better way to display info for better debugging                 DONE
-Add a error trapping display method to Util.java
+Add a error trapping display method to Util.java                DONE
 Check for code consistency
 
 Comment

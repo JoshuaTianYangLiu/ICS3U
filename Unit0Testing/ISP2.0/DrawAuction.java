@@ -54,7 +54,6 @@ public class DrawAuction{
         }
         c.setColor(text);
         for(int i=1; i<arrPointer; i++){
-            //List with color TODO
             c.drawString(i+": "+j.monopolyTiles[propertiesOwned[i]].getInfo(), 20, 25*i+40);
             Property t = (Property)j.monopolyTiles[propertiesOwned[i]];
             c.drawString(t.getColourName(), 300, 25*i+40);

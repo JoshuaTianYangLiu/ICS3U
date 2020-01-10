@@ -1,4 +1,4 @@
-public class ChanceCard{    //TODO: Clean up code from removing the Tile interface
+public class ChanceCard{
     String message;
     String operation;
     int value1,value2;

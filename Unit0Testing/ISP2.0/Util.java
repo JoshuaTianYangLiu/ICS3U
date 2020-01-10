@@ -44,4 +44,8 @@ public class Util{
     static void messageDialog(String message,String title){
         JOptionPane.showMessageDialog(null, message,title,JOptionPane.PLAIN_MESSAGE);
     }
+    static void exception(String input,Exception e){
+        Util.messageDialog("An Exception has occured\n"+input+"---------------\n"+'\n'+e.toString(),"ERROR");
+        System.exit(1);
+    }
 }

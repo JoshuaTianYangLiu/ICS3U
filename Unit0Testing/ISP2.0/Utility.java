@@ -34,7 +34,6 @@ public class Utility implements Tile,OwnableTile{
                                 "Pay "+j.nameOfPlayer[ownerId]+" $("+j.diceOne+" + "+j.diceTwo+")*"+
                                 (utilitiesOwned==1?multiplier1:multiplier2)+"= $"+
                                 ((utilitiesOwned==1?multiplier1:multiplier2)*totalCost)+".","Pay rent on "+name);
-            //TODO: Add some way to display how much they have to pay
             if(utilitiesOwned==1){
                 j.transferMoney(multiplier1*totalCost,ownerId);
             }else{
@@ -52,7 +51,6 @@ public class Utility implements Tile,OwnableTile{
                                     "2: Put up for auction",
                                     "Please enter a valid option 1,2",
                                     name,1,2);
-                                    //TODO: add an option to disable auctions
             if(choice==1){
                 if(j.getBalance()>=cost){
                     buyProperty(j,cost,j.curPlayer);

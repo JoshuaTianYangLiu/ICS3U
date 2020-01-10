@@ -20,9 +20,8 @@ public class DrawGame{
             //999x760
             getOutOfJailImg=ImageIO.read(new File("assets\\Images\\GetOutOfJail.png"));
         }catch(Exception e){
-            System.out.println("Missing MonopolyBoard.jpg or GetOutOfJail.png");
-            e.printStackTrace();
-            // System.exit(1);
+            boardGame.close();
+            Util.exception("Missing MonopolyBoard.jpg or GetOutOfJail.png", e);
         }
         drawBoard();
         for(int i=1; i<j.numOfPlayers; i++){
@@ -133,8 +132,8 @@ public class DrawGame{
         try{
             Thread.sleep(j.pauseTime);
         }catch(Exception e){
-            //Thread interupted
-            //TODO Fill this in
+            boardGame.close();
+            Util.exception("Thread Interrupted", e);
         }
         boardGame.setColor(defaultBG);
         drawPlayerList(j);
@@ -154,8 +153,8 @@ public class DrawGame{
         try{
             Thread.sleep(j.pauseTime);
         }catch(Exception e){
-            //Thread interupted
-            //TODO Fill this in
+            boardGame.close();
+            Util.exception("Thread Interrupted", e);
         }
         boardGame.setColor(defaultBG);
         drawPlayerList(j);
@@ -169,9 +168,8 @@ public class DrawGame{
             try{
                 Thread.sleep(100);
             }catch(Exception e){
-                //Thread interrupted
-                e.printStackTrace();
-                System.exit(1);
+                boardGame.close();
+                Util.exception("Thread Interrupted", e);
             }
             pos--;
             drawScreenExcCurPlayer(j);
@@ -183,9 +181,8 @@ public class DrawGame{
             try{
                 Thread.sleep(100);
             }catch(Exception e){
-                //Thread interrupted
-                e.printStackTrace();
-                System.exit(1);
+                boardGame.close();
+                Util.exception("Thread Interrupted", e);
             }
             pos++;
             if(pos>j.NUMBEROFTILES){

@@ -52,10 +52,8 @@ public class DrawMortgage{
     void drawList(int[] tilesOwned,int arrPointer,ISP_Joshua j){
         //arrPointer can be as large as 28
         //Console window should hold nearly 28.
-        //TODO
         for(int i=1; i<arrPointer; i++){
             c.setColor(text);
-            //List with color TODO
             c.drawString(i+": "+j.monopolyTiles[tilesOwned[i]].getInfo(), 20, 25*i+40);
             if(j.monopolyTiles[tilesOwned[i]].getTileType()==2){
                 Property p = (Property)j.monopolyTiles[tilesOwned[i]];

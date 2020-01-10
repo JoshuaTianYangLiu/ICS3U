@@ -30,16 +30,54 @@ public class ISP_Joshua{
     Font textTitle=new Font("Cambria",Font.PLAIN,40);
     Font textHeader=new Font("Cambria",Font.PLAIN,20);
     Font textInfo = new Font ("Times New Roman", Font.PLAIN, 20);
-    // int propertyToPlayer[] = new int[numOfPlayers];
-    // int propertyToHotel[] = new int[numOfPlayers];   //Player can own a max of 1 hotel
-    // int propertyToHouse[] = new int[numOfPlayers];  //Player can own a max of __ hotel
+    Font titleCard=new Font("Cambria",Font.BOLD,75);
     int curPlayer;
     boolean canCollectRentInJail=true,hasFreeParking=true;
     ISP_Joshua(){
         c=new Console(25,80,"ISP_Joshua");
     }
     void splashScreen(){
-        //Prob not gonna get this part
+        Color startingColor = new Color(192,192,192);
+        c.setColor(startingColor);
+        c.fillRect(0,0,640,500);
+        DrawDice.loadAssets(c);
+        //Create a 32x25 grid of 20x20 dice
+        boolean diceDrawn[] = new boolean[801];
+        int cnt=800;
+        while(cnt>0){
+            if(cnt%91==0){
+                try{
+                    Thread.sleep(1000);
+                }catch(Exception e){}
+            }
+            int pos=random(1,cnt);
+            int cntToPos=1;
+            for(int i=0; i<diceDrawn.length; i++){
+                if(!diceDrawn[i]){
+                    if(cntToPos++==pos){
+                        diceDrawn[i]=true;
+                        SplashScreen ss = new SplashScreen(c,i%32,i/32);
+                        ss.start();
+                        break;
+                    }
+                }
+            }
+            cnt--;
+        }
+        try{
+            Thread.sleep(4000);
+        }catch(Exception e){}
+        c.setColor(Color.BLACK);
+        c.setFont(titleCard);
+        c.drawString("MONOPOLY",125,200);
+        c.setFont(textHeader);
+        pressAnyKey();
+        //Each interval a unrolled dice will run and roll a random number
+        //After that it'll have the title screen and "Press any key"
+        //Threads will be used to run multiple dice at the same time
+    }
+    public int random(int a,int b){
+        return (int)((b-a+1)*Math.random()+1);
     }
     int mainMenu(){
         title("Main Menu");
@@ -147,9 +185,9 @@ public class ISP_Joshua{
         }
     }
     void settings(){
-        title("Settings");
-        c.setFont(textHeader);
         while(true){
+            title("Settings");
+            c.setFont(textHeader);
             String output="";
             output+="1: Number of players:                             "+(numOfPlayers-1)+'\n';
             output+="2: Pause between animations:               "+pauseTime+"ms\n";
@@ -193,17 +231,25 @@ public class ISP_Joshua{
         try{
         file = new BufferedReader(new FileReader("assets\\Scoreboard.txt"));
         }catch(Exception e){
-            System.out.println("Scoreboard.txt does not exist");
-            e.printStackTrace();
-            System.exit(1);
+            c.close();
+            Util.exception("Scoreboard.txt does not exist", e);
         }
         String fileContent="",fileLine="";
         while(true){
             try{
                 fileLine=file.readLine();
-            }catch(Exception e){}
+            }catch(Exception e){
+                c.close();
+                Util.exception("Reading file from Scoreboard.txt", e);
+            }
             if(fileLine==null)break;
             fileContent+=fileLine+'\n';
+        }
+        try{
+            file.close();
+        }catch(Exception e){
+            c.close();
+            Util.exception("Closing Scoreboard.txt", e);
         }
         String contents[] = fileContent.split("\n");
         int len=contents.length/2;
@@ -239,9 +285,8 @@ public class ISP_Joshua{
         try{
             fileOutput=new PrintWriter(new FileWriter("assets\\Scoreboard.txt",true));
         }catch(Exception e){
-            System.out.println("Scoreboard.txt does not exist");
-            e.printStackTrace();
-            System.exit(1);
+            c.close();
+            Util.exception("Scoreboard.txt does not exist", e);
         }
         fileOutput.println(name);
         fileOutput.println(balance);
@@ -273,7 +318,13 @@ public class ISP_Joshua{
     }
     void resetBoard(){
         curPlayer=1;
-
+        hasGetOutOfJail=new boolean[numOfPlayers];
+        inJail = new boolean[numOfPlayers];
+        turnsInJail = new int[numOfPlayers];
+        positionOfPlayers = new int[numOfPlayers];
+        balance = new int[numOfPlayers];
+        nameOfPlayer = new String[numOfPlayers];
+        monopolyPieces = new BufferedImage[numOfPlayers][4];
         Arrays.fill(positionOfPlayers,1);
         Arrays.fill(balance,initialBalance);
         Arrays.fill(hasGetOutOfJail,false);
@@ -305,7 +356,7 @@ public class ISP_Joshua{
         }
         moveTo(position);
     }
-    void moveTo(int n){ //TODO: Test this method
+    void moveTo(int n){
         int moveBy=n-getPosOfCurPlayer();
         if(moveBy<0){
             moveBy+=NUMBEROFTILES;
@@ -348,7 +399,7 @@ public class ISP_Joshua{
         balance[curPlayer]-=amount;
         gameGui.modifyBalance(-amount, this);
     }
-    void runAuction(OwnableTile land){ //TODO: Run auction for property
+    void runAuction(OwnableTile land){
         String info = land.getFullInfo();
         boolean canBid[] = new boolean[numOfPlayers];
         Arrays.fill(canBid,true);
@@ -565,9 +616,7 @@ public class ISP_Joshua{
                         monopolyPieces[i][2]=ImageIO.read(new File("assets\\Images\\"+pieceNames[choice]+"180.png"));
                         monopolyPieces[i][3]=ImageIO.read(new File("assets\\Images\\"+pieceNames[choice]+"270.png"));
                     }catch(Exception e){
-                        System.out.println("One of image "+pieceNames[choice]+".png does not exist.");
-                        e.printStackTrace();
-                        System.exit(1);
+                        Util.exception("One of "+pieceNames[choice]+".png images does not exist.", e);
                     }
                     break;
                 }
@@ -624,7 +673,7 @@ public class ISP_Joshua{
                                                 "You are released!", "JAIL");
                             inJail[curPlayer]=false;
                             turnsInJail[curPlayer]=0;
-                            break;  //continue turn TODO: Figure out which should continue the player's turn and which should move to the next
+                            break;
                         }else{
                             Util.messageDialog("You rolled a "+diceOne+" and "+diceTwo+".\n"+
                                                 "Still in jail.", "JAIL");
@@ -661,8 +710,7 @@ public class ISP_Joshua{
                                             "1: Roll dice\n"+
                                             "2: Mortgage/Unmortgage\n"+
                                             "3: Buy/Sell Houses\n"+
-                                            "4: Trade\n"+
-                                            "5: Back to Menu\n", "Please choose a valid option",nameOfPlayer[curPlayer], 1,5);
+                                            "4: Back to Menu\n", "Please choose a valid option",nameOfPlayer[curPlayer], 1,4);
                 if(choice==1)break;
                 if(choice==2){
                     DrawMortgage t = new DrawMortgage();
@@ -674,12 +722,12 @@ public class ISP_Joshua{
                     t.draw(this);
                     t.close();
                 }
+                // if(choice==4){
+                //     DrawAuction t = new DrawAuction();
+                //     t.draw(this);
+                //     t.close();
+                // }
                 if(choice==4){
-                    DrawAuction t = new DrawAuction();
-                    t.draw(this);
-                    t.close();
-                }
-                if(choice==5){
                     gameGui.close();
                     gameGui=null;
                     c=new Console(25,80,"ISP_Joshua");
@@ -718,7 +766,6 @@ public class ISP_Joshua{
                 Util.messageDialog("WINNER!\n"+nameOfPlayer[1]+"\n"+
                                     "Won with $"+balance[1]+"\n"+
                                     "Time Elasped, "+hour+":"+min+":"+sec,"MONOPOLY");
-                //Save to leaderboard TODO
                 gameGui.close();
                 gameGui=null;
                 addToScoreboard(nameOfPlayer[1],balance[1]);
@@ -802,30 +849,26 @@ public class ISP_Joshua{
         try{
             properties = new BufferedReader(new FileReader(new File("assets\\Properties"+boardLanguage+".txt")));
         }catch(Exception e){
-            System.out.println("Properties.txt not found, please include file");
-            e.printStackTrace();
-            System.exit(1);
+            c.close();
+            Util.exception("Properties.txt not found, please include file", e);
         }
         try{
             railroad = new BufferedReader(new FileReader(new File("assets\\Railroad"+boardLanguage+".txt")));
         }catch(Exception e){
-            System.out.println("Railroad.txt not found, please include file");
-            e.printStackTrace();
-            System.exit(1);
+            c.close();
+            Util.exception("Railroad.txt not found, please include file", e);
         }
         try{
             utility = new BufferedReader(new FileReader(new File("assets\\Utility.txt")));
         }catch(Exception e){
-            System.out.println("Utility.txt not found, please include file");
-            e.printStackTrace();
-            System.exit(1);
+            c.close();
+            Util.exception("Utility.txt not found, please include file", e);
         }
         try{
             tax = new BufferedReader(new FileReader(new File("assets\\Tax.txt")));
         }catch(Exception e){
-            System.out.println("Tax.txt not found, please include file");
-            e.printStackTrace();
-            System.exit(1);
+            c.close();
+            Util.exception("Tax.txt not found, please include file", e);
         }
         for(int i=1; i<=NUMBEROFTILES; i++){
             try{
@@ -836,19 +879,15 @@ public class ISP_Joshua{
                     try{
                         monopolyTiles[i]=new Property(properties.readLine());
                     }catch(Exception e){
-                        System.out.println("Something wrong happened on file reading Properties.txt and parsing\n Stack trace: ");
-                        e.printStackTrace();
-                        //TODO: Differentiate the error between readline and parsing
-                        System.exit(1);
+                        c.close();
+                        Util.exception("Something wrong happened on file reading Properties.txt and parsing", e);
                     }
                 }else if(boardTileInputId.equals("3")){
                     try{
                         monopolyTiles[i]=new Railroad(railroad.readLine());
                     }catch(Exception e){
-                        System.out.println("Something wrong happened on file reading Railroad.txt and parsing\n Stack trace: ");
-                        e.printStackTrace();
-                        //TODO: Differentiate the error between readline and parsing
-                        System.exit(1);
+                        c.close();
+                        Util.exception("Something wrong happened on file reading Railroad.txt and parsing", e);
                     }
                 }else if(boardTileInputId.equals("4")){
                     monopolyTiles[i]=new ChanceTile();
@@ -858,10 +897,8 @@ public class ISP_Joshua{
                     try{
                         monopolyTiles[i]=new Tax(tax.readLine());
                     }catch(Exception e){
-                        System.out.println("Something wrong happened on file reading Tax.txt and parsing\n Stack trace: ");
-                        e.printStackTrace();
-                        //TODO: Differentiate the error between readline and parsing
-                        System.exit(1);
+                        c.close();
+                        Util.exception("Something wrong happened on file reading Tax.txt and parsing", e);
                     }
                 }else if(boardTileInputId.equals("7")){
                     monopolyTiles[i]=new FreeParking();
@@ -873,19 +910,16 @@ public class ISP_Joshua{
                     try{
                         monopolyTiles[i]=new Utility(utility.readLine());
                     }catch(Exception e){
-                        System.out.println("Something wrong happened on file reading Railroad.txt and parsing\n Stack trace: ");
-                        e.printStackTrace();
-                        //TODO: Differentiate the error between readline and parsing
-                        System.exit(1);
+                        c.close();
+                        Util.exception("Something wrong happened on file reading Railroad.txt and parsing", e);
                     }
                 }else{
-                        System.out.println("Unknown id in BoardTileId.txt");
-                        System.exit(1);
+                    c.close();
+                    Util.exception("Unknown id in BoardTileId.txt",new Exception());
                 }
             }catch(Exception e){
-                System.out.println("Error in reading BoardTileId.txt, not enough id.");
-                e.printStackTrace();
-                System.exit(1);
+                c.close();
+                Util.exception("Error in reading BoardTileId.txt, not enough id.", e);
             }
         }
         try{
@@ -894,24 +928,21 @@ public class ISP_Joshua{
             railroad.close();
             utility.close();
         }catch(Exception e){
-            System.out.println("Error in closing files");
-            e.printStackTrace();
-            System.exit(1);
+            c.close();
+            Util.exception("Error in closing files", e);
         }
         BufferedReader chance=null,communityChest=null;
         try{
             chance = new BufferedReader(new FileReader(new File("assets\\Chance"+boardLanguage+".txt")));
         }catch(Exception e){
-            System.out.println("Cannot open Chance.txt, file does not exist");
-            e.printStackTrace();
-            System.exit(1);
+            c.close();
+            Util.exception("Cannot open Chance.txt, file does not exist", e);
         }
         try{
             communityChest = new BufferedReader(new FileReader(new File("assets\\CommunityChest.txt")));
         }catch(Exception e){
-            System.out.println("Cannot open CommunityChest.txt, file does not exist");
-            e.printStackTrace();
-            System.exit(1);
+            c.close();
+            Util.exception("Cannot open CommunityChest.txt, file does not exist", e);
         }
         String inputLine="",entireInput="";
         try{
@@ -919,8 +950,8 @@ public class ISP_Joshua{
                 entireInput+=inputLine+'\n';
             }
         }catch(Exception e){
-            e.printStackTrace();
-            System.exit(1);
+            c.close();
+            Util.exception("Error reading Chance.txt", e);
         }
         String chanceArr[] = entireInput.split("\n");
         entireInput="";
@@ -929,8 +960,8 @@ public class ISP_Joshua{
                 entireInput+=inputLine+'\n';
             }
         }catch(Exception e){
-            e.printStackTrace();
-            System.exit(1);
+            c.close();
+            Util.exception("Error reading CommunityChest.txt", e);
         }
         String communityChestArr[]= entireInput.split("\n");
         chancePile=new ChanceCard[chanceArr.length];
@@ -939,26 +970,23 @@ public class ISP_Joshua{
             try{
                 chancePile[i]=new ChanceCard(chanceArr[i]);
             }catch(Exception e){
-                System.out.println("Parsing error in ChanceCard.java make sure each line of ChanceCards.txt is valid");
-                System.out.println("Error parsing line "+chanceArr[i]);
-                e.printStackTrace();
-                System.exit(1);
+                c.close();
+                Util.exception("Parsing error in ChanceCard.java make sure each line of ChanceCards.txt is valid", e);
             }
         }
         for(int i=0; i<communityChestArr.length; i++){
             try{
                 communityChestPile[i]=new CommunityChestCard(communityChestArr[i]);
             }catch(Exception e){
-                System.out.println("Parsing error in CommunityChest.java make sure each line of CommunityChest.txt is valid");
-                System.out.println("Error parsing line "+communityChestArr[i]);
-                e.printStackTrace();
-                System.exit(1);
+                c.close();
+                Util.exception("Parsing error in CommunityChest.java make sure each line of CommunityChest.txt is valid", e);
             }
         }
         try{
             background=ImageIO.read(new File("assets\\Images\\Background.png"));
         }catch(Exception e){
-            System.exit(1);
+            c.close();
+            Util.exception("Error reading Background.png", e);
         }
     }
     
