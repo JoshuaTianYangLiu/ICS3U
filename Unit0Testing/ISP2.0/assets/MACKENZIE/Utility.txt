@@ -1,2 +1,0 @@
-Electric Company|150|83|4|10
-Water Works|150|83|4|10
