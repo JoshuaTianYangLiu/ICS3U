@@ -9,10 +9,11 @@ Your team wins a MCPT competition-Collect $10|ADD|15
 Math help-Move to the Math Room|MOVETO|10
 Caught skipping class-Go To Jail|GOTOJAIL
 Won school raffle-Collect $100|ADD|100
-Arrived at early school on a late start-Move to South Entrance|MOVETO|26
+Arrived early at school on a late start-Move to South Entrance|MOVETO|26
 Trip cancelled-Collect refund of $150|ADD|150
 End of school-Advance to the nearest Entrance|NEARRAIL
 Repair on all your rooms-Pay $50 for each House and $110 for each Hotel|MAKEHIMLOSE|50|110
 MSC meeting during lunch-Move to Science Hallway|MOVETO|27
 Caught hardcoding in contest-Go to jail|GOTOJAIL
 Forgot to go to MCPT-Pay $75|REMOVE|75
+Teachers on strike on ISP due date - Get $20|ADD|20

@@ -14,7 +14,7 @@ A friend pays back lunch money-Collect $100|ADD|100
 You achieved Honour Roll-Collect $70|ADD|70
 Switched classes-Move to Portable 1|MOVETO|6
 Your rooms get AC-Pay $40 per House and $130 per Hotel|MAKEHIMLOSE|40|130
-Assigned Monopoly As ISP-Move to the nearest Entrance to go home and suffer|NEARUTIL
+Assigned Monopoly As ISP-Move to the nearest Entrance to go home and suffer|NEARRAIL
 Cashier makes a mistake-collect $500|ADD|500
 Trolled a contest and lost time bonus-Pay all other players $10|GIVEPLAYERS|10
 Took a course on Dynamic Programming-Pay $20|REMOVE|20
