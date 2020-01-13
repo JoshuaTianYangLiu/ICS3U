@@ -9,6 +9,12 @@ public class DrawDice{
     static Console c;
     static BufferedImage dice[] = new BufferedImage[7];
     DrawDice(){}
+    
+    /** 
+     * Name: loadAssets
+     * @param con
+     * Loads necessary images for animation
+     */
     public static void loadAssets(Console con){
         c=con;
         for(int i=1; i<=6; i++){
@@ -20,6 +26,14 @@ public class DrawDice{
             }
         }
     }
+    
+    /** 
+     * Name: drawDice
+     * @param diceVal
+     * @param x
+     * @param y
+     * draws dices with value and at certain coordinates
+     */
     public static void drawDice(int diceVal,int x,int y){
         c.drawImage(dice[diceVal],x,y,null);
     }

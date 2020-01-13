@@ -9,13 +9,24 @@ public class DrawMortgage{
     Color isMortgaged=new Color(207,20,43);
     Font textTitle=new Font("Cambria",Font.PLAIN,26);
     Font textInfo = new Font ("Times New Roman", Font.PLAIN, 20);
+
+    /**
+     * DrawMortgage
+     * creates window
+     */
     DrawMortgage(){
         c=new Console(30,90,"Mortgage/Unmortgage");
         //Load assets
     }
+    
+    /** 
+     * Name: draw
+     * @param j
+     * Animates and displays information of properties owned by current player and if it's mortaged or not
+     */
     //720x500
     void draw(ISP_Joshua j){
-        int tilesOwned[] = new int[j.NUMBEROFTILES+1];
+        int tilesOwned[] = new int[j.NUMBEROFTILES+1];  //Get list of properties owned by current player
         int arrPointer=1;
         for(int i=1; i<=j.NUMBEROFTILES; i++){
             if(j.isOwnableTile(i)){
@@ -25,6 +36,8 @@ public class DrawMortgage{
                 }
             }
         }
+
+        //User input to decide to mortgage or unmortgage
         while(true){
             c.setColor(background);
             c.fillRect(0,0,720,600);
@@ -49,9 +62,15 @@ public class DrawMortgage{
             else t.mortgage(j);
         }
     }
+    
+    /** 
+     * Name: drawList
+     * @param tilesOwned
+     * @param arrPointer
+     * @param j
+     * Draw the list of properties owned by current player and it's status
+     */
     void drawList(int[] tilesOwned,int arrPointer,ISP_Joshua j){
-        //arrPointer can be as large as 28
-        //Console window should hold nearly 28.
         for(int i=1; i<arrPointer; i++){
             c.setColor(text);
             c.drawString(i+": "+j.monopolyTiles[tilesOwned[i]].getInfo(), 20, 25*i+40);
@@ -59,6 +78,8 @@ public class DrawMortgage{
                 Property p = (Property)j.monopolyTiles[tilesOwned[i]];
                 c.drawString(p.getColourName(), 300, 25*i+40);
             }
+
+            //Draw status
             OwnableTile t = (OwnableTile)j.monopolyTiles[tilesOwned[i]];
             if(t.isMortgaged()){
                 c.setColor(isMortgaged);
@@ -76,6 +97,11 @@ public class DrawMortgage{
             }
         }
     }
+
+    /**
+     * Name: close
+     * closes window
+     */
     void close(){
         c.close();
     }

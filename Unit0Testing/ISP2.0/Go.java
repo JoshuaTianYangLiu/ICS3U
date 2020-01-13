@@ -2,14 +2,30 @@ public class Go implements Tile{
     Go(){
 
     }
+    
+    /** 
+     * Name: executeTile
+     * @param j
+     * Nothing needed ISP_Joshua handles GO
+     */
     public void executeTile(ISP_Joshua j){
-        //Go needs nothing right?
-        //Im pretty sure it needs nothing
     }
+    
+    /** 
+     * Name: getTileType
+     * @return int
+     * returns tile id
+     */
     public int getTileType(){
         return 1;
     }
+    
+    /** 
+     * Name: getInfo
+     * @return String
+     * returns basic information
+     */
     public String getInfo(){
-        return "Go"; //Idk if anything is needed
+        return "Go";
     }
 }

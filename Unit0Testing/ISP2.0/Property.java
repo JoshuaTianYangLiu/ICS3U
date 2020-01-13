@@ -1,32 +1,32 @@
 import java.awt.*;
 
 public class Property implements Tile,OwnableTile{
-    //This also needs to work with railroads and utilities
-    //How am i gonna make this work with chance cards?
-    //
     //Let the properties represent everything,
     //If it's not normal property, chance,mystery,jail,go
     //Return the id of the property
     //Main class will handle it
     static final int MORTGAGE=-1;
     String name;
-    int propertyColour;     //start from 2. 1 for railroad 0 for utility
+    int propertyColour;     //start from 1.
     int cost;
-    int tierLevel;  //0=rent -1= morgage, >0 houses/ hotels
-    int tierCost[] = new int[6];
+    int tierLevel;  //0=rent >0 houses/ hotels
+    int tierCost[] = new int[6];    //Cost of rent for each tier
     int houseCost;
     int hotelCost;
     int mortgageValue,unMortgageValue;
     int ownerId;
     boolean isMortgaged;
-    Property(String input) throws Exception{
+
+    /**
+     * Name: Property
+     * @param input
+     * Parse input and setup usage for game
+     */
+    Property(String input){
         isMortgaged=false;
         ownerId=0;
         tierLevel=0;
         String portions[] = input.split("\\|");     // Added \\ as escape characters 
-        if(portions.length!=12){
-            throw new Exception("Not enough parameters in property line\n Input: "+input);
-        }
         name=portions[0];
         propertyColour=Integer.parseInt(portions[1]);
         houseCost=Integer.parseInt(portions[2]);
@@ -40,15 +40,34 @@ public class Property implements Tile,OwnableTile{
         //Monopoly rules says that mortgage value is half the cost of the property cost
         //selling anything is half the cost right?????
     }
+
+    /**
+     * Name: reset
+     * reset game
+     */
     public void reset(){
         isMortgaged=false;
         ownerId=0;
         tierLevel=0;
     }
+    
+    /** 
+     * Name: buyProperty
+     * @param j
+     * @param cost
+     * @param playerId
+     * Buys property for player
+     */
     public void buyProperty(ISP_Joshua j,int cost,int playerId){    //The property can be bought with different costs due to auctions
         ownerId=playerId;
         j.removeMoney(cost,playerId);
     }
+    
+    /** 
+     * Name: payRent
+     * @param j
+     * Deals with dialog and transfering money
+     */
     void payRent(ISP_Joshua j){
         if(isMortgaged){
             Util.messageDialog(name+" is mortgaged\n"+
@@ -69,6 +88,12 @@ public class Property implements Tile,OwnableTile{
             Util.messageDialog("Owner in jail, no rent paid","Do not pay rent on "+name);
         }
     }
+    
+    /** 
+     * Name: buyHouse
+     * @param j
+     * Buys house for player
+     */
     void buyHouse(ISP_Joshua j){    //In my words, move up a tier level
         int retVal=j.getMinOfColourSet(propertyColour);
         if(retVal==-1){ //Does not own full colour set
@@ -79,62 +104,86 @@ public class Property implements Tile,OwnableTile{
             Util.messageDialog("One of your properties is mortgaged!","Buy House");
             return;
         }
-        if(tierLevel!=retVal){
+        if(tierLevel!=retVal){  //Tier level not minimum house level
             Util.messageDialog("Please follow the even build rule.\n"+
                                 "You must first buy houses for properties with "+retVal+" houses.", "Buy House");
             return;
         }
-        if(tierLevel==5){
+        if(tierLevel==5){   //Is Hotel
             Util.messageDialog("You cannot build anymore on this property","Buy House");
             return;
         }
         if(tierLevel<4){    //Buying house
-            if(j.getBalance()<houseCost){
+            if(j.getBalance()<houseCost){   //Not enough money
                 Util.messageDialog("Not enough money to buy house!", "Buy House");
                 return;
             }
-            Util.messageDialog("House bought on "+name+".","Buy House");    //Maybe need additional info
+            Util.messageDialog("House bought on "+name+".","Buy House");
             j.removeMoney(houseCost);
             tierLevel++;
         }else{  //Buying hotel
-            if(j.getBalance()<hotelCost){
+            if(j.getBalance()<hotelCost){   //Not enough money
                 Util.messageDialog("Not enough money to buy hotel!", "Buy House");
                 return;
             }
-            Util.messageDialog("Hotel bought on "+name+".","Buy House");    //Maybe need additional info
+            Util.messageDialog("Hotel bought on "+name+".","Buy House");
             j.removeMoney(hotelCost);
             tierLevel++;
         }
     }
+    
+    /** 
+     * Name: sellHouse
+     * @param j
+     * Sells house
+     */
     void sellHouse(ISP_Joshua j){   //Move down a tier, this should also work with mortgaging
         int retVal=j.getMaxOfColourSet(propertyColour);
-        if(retVal==-1||retVal==-2||tierLevel==0){
+        if(retVal==-1||retVal==-2||tierLevel==0){   //All of these cases mean they do not own any houses
             Util.messageDialog("You cannot sell houses if you do not have any houses", "Sell House");
             return;
         }
-        if(tierLevel!=retVal){
+        if(tierLevel!=retVal){  //Even sell rule
             Util.messageDialog("Please follow the even sell rule.\n"+
                                 "You must first sell houses for properties with "+retVal+" houses.", "Sell House");
             return;
         }
-        if(tierLevel==5){
+        if(tierLevel==5){   //Is hotel
             Util.messageDialog("Hotel Sold on "+name+".","Sell House");
             j.addMoney(hotelCost/2);
             tierLevel--;
-        }else{
+        }else{  //Is house
             Util.messageDialog("House Sold on "+name+".","Sell House");
             j.addMoney(houseCost/2);
             tierLevel--;
         }
 
     }
+    
+    /** 
+     * Name: getNumOfHouses
+     * @return int
+     * Returns number of houses
+     */
     int getNumOfHouses(){
         if(tierLevel==5)return 0;
         return tierLevel;
     }
+    
+    /** 
+     * Name: getNumOfHotels
+     * @return int
+     * returns number of hotels
+     */
     int getNumOfHotels(){
         return tierLevel==5?1:0;
     }
+    
+    /** 
+     * Name: executeTile
+     * @param j
+     * Will execute when land on
+     */
     public void executeTile(ISP_Joshua j){
         //For the property tile, it is difficult to execute the property and known what function it should do.
         //This method if for just what should happen when a person lands on the tile
@@ -147,7 +196,7 @@ public class Property implements Tile,OwnableTile{
                                     "2: Put up for auction",
                                     "Please enter a valid option 1,2",
                                     name,1,2);
-            if(choice==1){
+            if(choice==1){  //Buy
                 if(j.getBalance()>=cost){
                     buyProperty(j,cost,j.curPlayer);
                     return;
@@ -156,29 +205,54 @@ public class Property implements Tile,OwnableTile{
                                         "Putting property up for auction.", name);
                 }
             }
-            j.runAuction(this);
-        }else{
+            j.runAuction(this); //Auction
+        }else{  //Owned, pay rent
             if(j.curPlayer!=ownerId){
                 payRent(j);
             }
         }
     }
+    
+    /** 
+     * Name: getTileType
+     * @return int
+     * returns tile id
+     */
     public int getTileType(){
         return 2;
     }
+    
+    /** 
+     * Name: getInfo
+     * @return String
+     * returns basic information
+     */
     public String getInfo(){
-        return name;    //Maybe need other info such of money and such.
+        return name;
     }
+    
+    /** 
+     * Name: mortgage
+     * @param j
+     * mortgage property
+     */
     public void mortgage(ISP_Joshua j){
-        if(tierLevel==0){
+        int maxLevel = j.getMaxOfColourSet(propertyColour);
+        if(maxLevel==0){   //No houses
             isMortgaged=true;
-            j.addMoney(cost/2);
+            j.addMoney(cost/2); //Mortgage amount
         }else{
-            Util.messageDialog("You have houses on this property, Sell those first", name);
+            Util.messageDialog("You have houses on colour set, Sell those first", name);
         }
     }
+    
+    /** 
+     * Name: unMortgage
+     * @param j
+     * unmortgage property
+     */
     public void unMortgage(ISP_Joshua j){
-        if(j.getBalance()>=unMortgageValue){
+        if(j.getBalance()>=unMortgageValue){    //Has enough money
             isMortgaged=false;
             j.removeMoney(unMortgageValue);
         }else{
@@ -186,36 +260,66 @@ public class Property implements Tile,OwnableTile{
                                 "Cannot unmortgage this property.", name);
         }
     }
+    
+    /** 
+     * Name: isMortgaged
+     * @return boolean
+     * returns if property is mortgaged
+     */
     public boolean isMortgaged(){
         return isMortgaged;
     }
+    
+    /** 
+     * Name: transferOwnership
+     * @param toPlayer
+     * Transfer the ownerid to new player
+     */
     public void tranferOwnership(int toPlayer){
         ownerId=toPlayer;
     }
+    
+    /** 
+     * Name: getOwnerId
+     * @return int
+     * returns id of person who owns the land
+     */
     public int getOwnerId(){
         return ownerId;
     }
+    
+    /** 
+     * Name: getColourName
+     * @return String
+     * Returns name of the colour of the property
+     */
     public String getColourName(){
         switch(propertyColour){
-            case 2:
+            case 1:
                 return "Brown";
-            case 3:
+            case 2:
                 return "Light Blue";
-            case 4:
+            case 3:
                 return "Purple";
-            case 5:
+            case 4:
                 return "Orange";
-            case 6:
+            case 5:
                 return "Red";
-            case 7:
+            case 6:
                 return "Yellow";
-            case 8:
+            case 7:
                 return "Green";
-            case 9:
+            case 8:
                 return "Blue";
         }
         return "";
     }
+    
+    /** 
+     * Name: getColour
+     * @return Color
+     * returns colour object of the property
+     */
     public Color getColour(){
         switch(propertyColour){
             case 1:
@@ -237,6 +341,12 @@ public class Property implements Tile,OwnableTile{
         }
         return null;
     }
+    
+    /** 
+     * Name: getFullInfo
+     * @return String
+     * returns full info of property
+     */
     public String getFullInfo(){
         return 
             "Cost to buy $"+cost+'\n'+
@@ -252,35 +362,22 @@ public class Property implements Tile,OwnableTile{
             "Houses cost: $"+houseCost+'\n'+
             "Hotel cost: $"+hotelCost;
     }
+    
+    /** 
+     * Name: getMortgage
+     * @return int
+     * returns value to mortgage
+     */
     public int getMortgage(){
         return mortgageValue;
     }
+    
+    /** 
+     * Name: getUnMortgage
+     * @return int
+     * returns value to unmortgage
+     */
     public int getUnMortgage(){
         return unMortgageValue;
     }
 }
-/*
-To future me, This should be done.
-but idk everything is implemented correctly, or if there's any logic errors.
-If there's anything that cant be fixed easily. Tear it down and rebuild it.
-Formatting for the property cards are down below
-You might need to add exceptions in order to account for invalid moves and operations
-This interacts back and forth with the main class
-God, I really hope i got this right on the first try
-Next off, The chance card!
-As to my contest checker, taking a break from that, need a better way to parse
-*/
-/*
-name|group|houseCost|hotelCost|cost|unmortgagevalue|tierCost
-Name of Property
-Property group
-Rent
-Mortgage Value
-With one house:
-With two house:
-With three house:
-With four house:
-With Hotel
-House cost
-Hotel cost
-*/

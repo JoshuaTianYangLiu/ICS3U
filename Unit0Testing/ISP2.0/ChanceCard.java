@@ -2,9 +2,15 @@ public class ChanceCard{
     String message;
     String operation;
     int value1,value2;
-    ChanceCard(String input)throws Exception{
+
+    /**
+     * Name: ChanceCard
+     * @param input
+     * Parse and assigns approproate values to object
+     */
+    ChanceCard(String input){
         //We need to parse the string and assign the corresponding info
-        //Will be seperated by &
+        //Will be seperated by |
         String portions[] = input.split("\\|");
         message=portions[0];
         message=message.replace('-', '\n');
@@ -22,31 +28,48 @@ public class ChanceCard{
             value1=Integer.parseInt(portions[2]);
         }
     }
+    
+    /** 
+     * Name: getInfo
+     * @return String
+     * returns basic information of card
+     */
     public String getInfo() {
         return message;
     }
+    
+    /** 
+     * Name: getTileType
+     * @return int
+     * returns id of tile
+     */
     public int getTileType(){
         return 4;
     }
+    
+    /** 
+     * Name: executeTile
+     * @param j
+     * Execute chance card instructions
+     */
     void executeTile(ISP_Joshua j){
-        if(operation.equals("GETOUT")){
+        if(operation.equals("GETOUT")){ //Add getoutofjailcard
             j.addGetOutOfJail();
-        }else if(operation.equals("NEARRAIL")){
+        }else if(operation.equals("NEARRAIL")){//Move to nearest railroa
             j.moveUntil(3);
             j.executeCurrentTile();
-        }else if(operation.equals("NEARUTIL")){
+        }else if(operation.equals("NEARUTIL")){//Move to nearest utility
             j.moveUntil(10);
             j.executeCurrentTile();
-        }else if(operation.equals("MOVETO")){
+        }else if(operation.equals("MOVETO")){   //Move to tile
             j.moveTo(value1);
             //Execute tile
             j.executeCurrentTile();
-        }else if(operation.equals("ADD")){
+        }else if(operation.equals("ADD")){  //Add money
             j.addMoney(value1);
-        }else if(operation.equals("REMOVE")){
-            //Remove money, figure out what to do
+        }else if(operation.equals("REMOVE")){   //Remove money
             j.payTax(value1);
-        }else if(operation.equals("MAKEHIMLOSE")){
+        }else if(operation.equals("MAKEHIMLOSE")){  //Pay x amount per house and y amount per hotel owned
             //Pay __ for each house and __ for each hotel
             int numOfHouses=j.getNumOfHousesOwned();
             int numOfHotels=j.getNumOfHotelsOwned();
@@ -56,16 +79,16 @@ public class ChanceCard{
                                 "---------------------------\n"+
                                 "Pay $"+totalPayment, "Chance");
             j.payTax(totalPayment);
-        }else if(operation.equals("GIVEPLAYERS")){
+        }else if(operation.equals("GIVEPLAYERS")){  //Give everyplayer some amount
             for(int i=1; i<j.numOfPlayers; i++){
                 if(i!=j.curPlayer&&j.canCollectRentInJail(i)){
                     j.transferMoney(value1, i);
                 }
             }
-        }else if(operation.equals("MOVEBACK")){
+        }else if(operation.equals("MOVEBACK")){ //Move back some spaces
             j.moveBack(3);
             j.executeCurrentTile();
-        }else if(operation.equals("GOTOJAIL")){
+        }else if(operation.equals("GOTOJAIL")){ //Go to jail
             j.sendToJail();
         }
     }

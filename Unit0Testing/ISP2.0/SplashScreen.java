@@ -9,6 +9,11 @@ public class SplashScreen extends Thread{
         this.x=20*col;
         this.y=20*row;
     }
+
+    /**
+     * Name: rollDice
+     * Roll dice, and draw
+     */
     public void rollDice(){
         for(int i=0; i<waitTime.length; i++){
             DrawDice.drawDice(random(1,6), x, y);
@@ -17,9 +22,21 @@ public class SplashScreen extends Thread{
             }catch(Exception e){}
         }
     }
+    
+    /** 
+     * Name random
+     * @param a
+     * @param b
+     * @return int
+     * returns an int between a-b inclusive
+     */
     public int random(int a,int b){
         return (int)((b-a+1)*Math.random()+1);
     }
+    /**
+     * Name: run
+     * thread method
+     */
     public void run(){
         rollDice();
     }

@@ -2,6 +2,12 @@ public class CommunityChestCard{
     String message;
     String operation;
     int value1,value2;
+
+    /**
+     * Name: CommunityChestCard
+     * @param input
+     * Parse and assigns appropriate values for community chest card
+     */
     CommunityChestCard(String input){
         String portions[] = input.split("\\|");
         message=portions[0];
@@ -20,6 +26,12 @@ public class CommunityChestCard{
             value1=Integer.parseInt(portions[2]);  
         }
     }
+    
+    /** 
+     * Name: executeTile
+     * @param j
+     * Executes instructions on card (For comments, refer to ChanceCard.java executeTile method)
+     */
     public void executeTile(ISP_Joshua j){
         if(operation.equals("MOVETO")){
             j.moveTo(value1);
@@ -49,9 +61,21 @@ public class CommunityChestCard{
             }
         }
     }
+    
+    /** 
+     * Name: getTileType
+     * @return int
+     * returns the tile type
+     */
     public int getTileType(){
         return 5;
     }
+    
+    /** 
+     * Name: getInfo
+     * @return String
+     * returns basic information
+     */
     public String getInfo(){
         return message;
     }

@@ -1,0 +1,18 @@
+Advance to Go (Collect $200)|MOVETO|1
+Bank error in your favor-Collect $200|ADD|200
+Doctor's fee-Pay $50|REMOVE|50
+From sale of stock you get $50|ADD|50
+Get Out of Jail Free|GETOUT
+Go to Jail-Go directly to jail-Do not pass Go-Do not collect $200|GOTOJAIL
+Grand Opera Night-Collect $50 from every player for opening night seats|GETPLAYERS|50
+Holiday Fund matures-Receive $100|ADD|100
+Income tax refund-Collect $20|ADD|20
+It is your birthday-Collect $10|ADD|10
+Life insurance matures-Collect $100|ADD|100
+Pay hospital fees of $100|REMOVE|100
+Pay school fees of $150|REMOVE|150
+Receive $25 consultancy fee|ADD|25
+You are assessed for street repairs-$40 per house-$115 per hotel|MAKEHIMLOSE|40|115
+You have won second prize in a beauty contest-Collect $10|ADD|10
+You inherit $100|ADD|100
+
