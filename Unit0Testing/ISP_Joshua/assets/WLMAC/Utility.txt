@@ -1,0 +1,2 @@
+Washroom|150|83|4|10
+Staircase|150|83|4|10

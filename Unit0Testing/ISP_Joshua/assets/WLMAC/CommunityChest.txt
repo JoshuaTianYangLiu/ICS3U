@@ -1,0 +1,20 @@
+Spare change found on the floor-Collect $500|ADD|500
+Pay school fees of $150|REMOVE|150
+Pizza Party-Collect $75|ADD|75
+Arrived late on a late start-Go to the Office|MOVETO|2
+Bought MCPT hoodie-Pay $1|REMOVE|1
+Hosting competition-Collect $100 from every player|GETPLAYERS|100
+Get out of jail free|GETOUT
+Went to see your favorite teacher-Move to Computer Office|MOVETO|33
+It is your birthday-Collect $100|ADD|100
+Caught plagiarising-Go To Jail|GOTOJAIL
+You missed a test-Pay $20|REMOVE|20
+Went outside for lunch-Pay $30|REMOVE|30
+A friend pays back lunch money-Collect $100|ADD|100
+You achieved Honour Roll-Collect $70|ADD|70
+Switched classes-Move to Portable 1|MOVETO|6
+Your rooms get AC-Pay $40 per House and $130 per Hotel|MAKEHIMLOSE|40|130
+Assigned Monopoly As ISP-Move to the nearest Entrance to go home and suffer|NEARRAIL
+Cashier makes a mistake-collect $500|ADD|500
+Trolled a contest and lost time bonus-Pay all other players $10|GIVEPLAYERS|10
+Took a course on Dynamic Programming-Pay $20|REMOVE|20
