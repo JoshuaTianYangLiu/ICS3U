@@ -16,7 +16,7 @@ public class ISP_Joshua{
     int turnsInJail[] = new int[numOfPlayers];
     int positionOfPlayers[] = new int[numOfPlayers];
     int balance[] = new int[numOfPlayers];
-    String nameOfPlayer[] = new String[numOfPlayers];
+    String nameOfPlayer[] = new String[numOfPlayers]; 
     Tile monopolyTiles[] = new Tile[NUMBEROFTILES+1];
     int diceOne,diceTwo;
     ChanceCard chancePile[];
